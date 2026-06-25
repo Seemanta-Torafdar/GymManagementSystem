@@ -26,8 +26,8 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Member</th><th>Phone</th><th>Package</th><th>Shift</th>
-                    <th>Expiry</th><th>Days Left</th><th>Payment</th><th>Actions</th>
+                    <th>Member</th><th>Gender</th><th>Phone</th><th>Package</th><th>Shift</th>
+                    <th>Expiry</th><th>Days Left</th><th>Payment</th><th>Allocated Trainer</th><th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,6 +49,7 @@
                                 </div>
                             </div>
                         </td>
+                        <td>@m.Gender</td>
                         <td>@m.Phone</td>
                         <td>@if(m.ActivePackageName != null) { @m.ActivePackageName } else { <span class="badge badge-muted">None</span> }</td>
                         <td>@(m.ShiftName ?? "—")</td>
@@ -67,6 +68,7 @@
                             { <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span> }
                             else { <span class="badge badge-muted">—</span> }
                         </td>
+                        <td>@(m.AssignedTrainerName ?? "—")</td>
                         <td>
                             <div class="table-actions">
                                 <a asp-action="MemberDetails" asp-route-id="@m.Id" class="btn-sm-accent" title="View"><i class="fas fa-eye"></i></a>
@@ -82,7 +84,7 @@
                 }
                 @if (!Model.Any())
                 {
-                    <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">
+                    <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted)">
                         <i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:12px;color:rgba(230,57,70,0.2)"></i>
                         No members found. <a asp-action="CreateMember" style="color:var(--accent)">Add the first member</a>
                     </td></tr>

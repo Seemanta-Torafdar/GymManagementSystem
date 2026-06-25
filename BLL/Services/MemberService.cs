@@ -166,6 +166,10 @@ namespace BLL.Services
                 RemainingDays = activePurchase != null ? Math.Max(0, (activePurchase.EndDate - DateTime.Today).Days) : null,
                 PaymentStatus = activePurchase?.PaymentStatus,
                 ShiftName = activePurchase?.Shift?.ShiftName,
+                YogaClassName = activePurchase?.YogaSchedule?.ClassName,
+                YogaTimeRange = activePurchase?.YogaSchedule != null ? $"{activePurchase.YogaSchedule.DayOfWeek} {activePurchase.YogaSchedule.StartTime:hh\\:mm} - {activePurchase.YogaSchedule.EndTime:hh\\:mm}" : null,
+                CardioClassName = activePurchase?.CardioSchedule?.ClassName,
+                CardioTimeRange = activePurchase?.CardioSchedule != null ? $"{activePurchase.CardioSchedule.DayOfWeek} {activePurchase.CardioSchedule.StartTime:hh\\:mm} - {activePurchase.CardioSchedule.EndTime:hh\\:mm}" : null,
                 AssignedTrainerName = activeAssignment?.Trainer?.User != null ? $"{activeAssignment.Trainer.User.FirstName} {activeAssignment.Trainer.User.LastName}" : null
             };
         }

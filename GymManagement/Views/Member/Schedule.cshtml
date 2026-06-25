@@ -69,6 +69,48 @@
         }
     </div>
 
+    <!-- Yoga Class -->
+    <div class="form-card">
+        <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-spa"></i> Yoga Class</h3>
+        @if (!string.IsNullOrEmpty(Model.YogaClassName))
+        {
+            <div style="display:flex;align-items:center;gap:16px">
+                <div style="width:52px;height:52px;background:rgba(200,135,42,0.10);border:1px solid rgba(200,135,42,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <i class="fas fa-spa" style="color:var(--accent);font-size:1.3rem"></i>
+                </div>
+                <div>
+                    <div style="font-weight:800;font-size:1.1rem;margin-bottom:4px">@Model.YogaClassName</div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">@Model.YogaTimeRange</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p style="color:var(--text-muted);font-size:0.9rem">No yoga class selected.</p>
+        }
+    </div>
+
+    <!-- Cardio Class -->
+    <div class="form-card">
+        <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-running"></i> Cardio Class</h3>
+        @if (!string.IsNullOrEmpty(Model.CardioClassName))
+        {
+            <div style="display:flex;align-items:center;gap:16px">
+                <div style="width:52px;height:52px;background:rgba(200,135,42,0.10);border:1px solid rgba(200,135,42,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <i class="fas fa-running" style="color:var(--accent);font-size:1.3rem"></i>
+                </div>
+                <div>
+                    <div style="font-weight:800;font-size:1.1rem;margin-bottom:4px">@Model.CardioClassName</div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">@Model.CardioTimeRange</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p style="color:var(--text-muted);font-size:0.9rem">No cardio class selected.</p>
+        }
+    </div>
+
     <!-- Assigned Trainer -->
     <div class="form-card">
         <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-user-tie"></i> Assigned Trainer</h3>

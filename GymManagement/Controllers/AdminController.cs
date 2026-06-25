@@ -100,8 +100,15 @@ namespace GymManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteMember(int id)
         {
-            await _memberService.DeleteAsync(id);
-            TempData["Success"] = "Member deleted.";
+            try
+            {
+                await _memberService.DeleteAsync(id);
+                TempData["Success"] = "Member deleted.";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Cannot delete member. They have existing records (purchases, payments, or trainer assignments).";
+            }
             return RedirectToAction(nameof(Members));
         }
 

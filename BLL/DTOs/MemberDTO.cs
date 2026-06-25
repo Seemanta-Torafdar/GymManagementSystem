@@ -27,6 +27,10 @@ namespace BLL.DTOs
         public int? RemainingDays { get; set; }
         public string? PaymentStatus { get; set; }
         public string? ShiftName { get; set; }
+        public string? YogaClassName { get; set; }
+        public string? YogaTimeRange { get; set; }
+        public string? CardioClassName { get; set; }
+        public string? CardioTimeRange { get; set; }
         public string? AssignedTrainerName { get; set; }
     }
 
