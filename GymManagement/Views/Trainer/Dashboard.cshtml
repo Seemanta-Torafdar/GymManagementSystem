@@ -1,0 +1,91 @@
+@model BLL.DTOs.TrainerDTO
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_TrainerLayout";
+    var reviews = ViewBag.Reviews as IEnumerable<BLL.DTOs.ReviewDTO> ?? Enumerable.Empty<BLL.DTOs.ReviewDTO>();
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Welcome, @Model.FirstName! 🏋️</h1>
+        <p>@DateTime.Now.ToString("dddd, MMMM dd yyyy")</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card">
+        <div class="stat-card-icon blue"><i class="fas fa-users"></i></div>
+        <div class="stat-value">@Model.AssignedMembersCount</div>
+        <div class="stat-label">Assigned Members</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon yellow"><i class="fas fa-star"></i></div>
+        <div class="stat-value">@Model.AverageRating</div>
+        <div class="stat-label">Average Rating</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon purple"><i class="fas fa-comment"></i></div>
+        <div class="stat-value">@Model.TotalReviews</div>
+        <div class="stat-label">Total Reviews</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon green"><i class="fas fa-money-bill"></i></div>
+        <div class="stat-value" style="font-size:1.2rem">৳@Model.MonthlySalary.ToString("N0")</div>
+        <div class="stat-label">Monthly Salary</div>
+    </div>
+</div>
+
+<!-- Profile Card -->
+<div class="profile-header" style="margin-bottom:24px">
+    <div class="profile-photo-section">
+        <div class="avatar avatar-xl">
+            @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+            { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+            else { @Model.FirstName.FirstOrDefault() }
+        </div>
+    </div>
+    <div style="flex:1">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:4px">@Model.FullName</h2>
+        <p style="color:var(--accent);font-weight:600;margin-bottom:12px">@Model.Specialization</p>
+        <div class="profile-info-grid">
+            <div class="profile-info-item"><div class="info-label">Experience</div><div class="info-value">@Model.Experience years</div></div>
+            <div class="profile-info-item"><div class="info-label">Certifications</div><div class="info-value">@(Model.Certifications ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Status</div><div class="info-value"><span class="badge @(Model.IsAvailable ? "badge-success" : "badge-danger")">@(Model.IsAvailable ? "Available" : "Unavailable")</span></div></div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Bio))
+        {
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:12px;line-height:1.7">@Model.Bio</p>
+        }
+        <div style="margin-top:16px;display:flex;gap:10px">
+            <a asp-action="Profile" class="btn-primary btn-sm"><i class="fas fa-pencil"></i> Edit Profile</a>
+            <a asp-action="Students" class="btn-secondary btn-sm"><i class="fas fa-users"></i> View Students</a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Reviews -->
+@if (reviews.Any())
+{
+    <div class="table-card">
+        <div class="table-card-header">
+            <span class="table-card-title"><i class="fas fa-star" style="color:var(--gold)"></i> Member Reviews</span>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+            @foreach (var r in reviews.Take(5))
+            {
+                <div style="padding:16px;background:var(--bg-card-hover);border-radius:var(--radius-sm);border-left:3px solid var(--gold)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <strong style="font-size:0.9rem">@r.MemberName</strong>
+                        <div class="star-rating">
+                            @for (int s = 1; s <= 5; s++) { <i class="fas fa-star star @(s <= r.Rating ? "" : "empty")"></i> }
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(r.Comment))
+                    { <p style="color:var(--text-secondary);font-size:0.85rem">@r.Comment</p> }
+                    <span style="font-size:0.72rem;color:var(--text-muted)">@r.ReviewDate.ToString("MMM dd, yyyy")</span>
+                </div>
+            }
+        </div>
+    </div>
+}

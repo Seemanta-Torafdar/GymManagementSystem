@@ -1,0 +1,93 @@
+@model IEnumerable<BLL.DTOs.MemberDTO>
+@{
+    ViewData["Title"] = "Members";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-users" style="color:var(--accent)"></i> Members</h1>
+        <p>Manage all gym members</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="CreateMember" class="btn-primary"><i class="fas fa-plus"></i> Add Member</a>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title">All Members (@Model.Count())</span>
+        <form asp-action="Members" method="get" class="search-box">
+            <i class="fas fa-search"></i>
+            <input name="search" type="text" placeholder="Search by name, email, phone..." value="@ViewBag.Search" id="members-search" />
+            <button type="submit" style="background:none;border:none;color:var(--accent);cursor:pointer"><i class="fas fa-arrow-right"></i></button>
+        </form>
+    </div>
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th><th>Phone</th><th>Package</th><th>Shift</th>
+                    <th>Expiry</th><th>Days Left</th><th>Payment</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    int daysLeft = m.RemainingDays ?? 0;
+                    string daysBadge = daysLeft > 14 ? "badge-success" : daysLeft > 7 ? "badge-warning" : "badge-danger";
+                    <tr>
+                        <td>
+                            <div class="member-name-cell">
+                                <div class="avatar">
+                                    @if (!string.IsNullOrEmpty(m.ProfilePhoto))
+                                    { <img src="@m.ProfilePhoto" alt="@m.FirstName" /> }
+                                    else { @m.FirstName.FirstOrDefault() }
+                                </div>
+                                <div>
+                                    <strong>@m.FullName</strong>
+                                    <span>@m.Email</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@m.Phone</td>
+                        <td>@if(m.ActivePackageName != null) { @m.ActivePackageName } else { <span class="badge badge-muted">None</span> }</td>
+                        <td>@(m.ShiftName ?? "—")</td>
+                        <td>@(m.MembershipEndDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                        <td>
+                            @if (m.RemainingDays.HasValue)
+                            {
+                                <span class="badge @daysBadge">@daysLeft days</span>
+                            }
+                            else { <span>—</span> }
+                        </td>
+                        <td>
+                            @if (m.PaymentStatus == "Paid")
+                            { <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> }
+                            else if (m.PaymentStatus == "Pending")
+                            { <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span> }
+                            else { <span class="badge badge-muted">—</span> }
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a asp-action="MemberDetails" asp-route-id="@m.Id" class="btn-sm-accent" title="View"><i class="fas fa-eye"></i></a>
+                                <a asp-action="EditMember" asp-route-id="@m.Id" class="btn-sm btn-secondary" title="Edit"><i class="fas fa-pencil"></i></a>
+                                <form asp-action="DeleteMember" method="post" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@m.Id" />
+                                    <button type="submit" class="btn-danger btn-sm" data-confirm="Delete @m.FullName?" title="Delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">
+                        <i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:12px;color:rgba(230,57,70,0.2)"></i>
+                        No members found. <a asp-action="CreateMember" style="color:var(--accent)">Add the first member</a>
+                    </td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

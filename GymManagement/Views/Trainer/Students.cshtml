@@ -1,0 +1,60 @@
+@model BLL.DTOs.TrainerDTO
+@{
+    ViewData["Title"] = "My Students";
+    Layout = "_TrainerLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-users" style="color:var(--accent)"></i> My Students</h1>
+        <p>Manage workout plans and track progress for your assigned members.</p>
+    </div>
+</div>
+
+<div class="card" style="padding:0">
+    <div style="padding:20px;border-bottom:1px solid var(--border)">
+        <h3 style="font-size:1.1rem;font-weight:700">Assigned Members (@Model.Assignments.Count)</h3>
+    </div>
+    <div style="padding:24px">
+        @if (!Model.Assignments.Any())
+        {
+            <div style="text-align:center;color:var(--text-muted);padding:40px">
+                <i class="fas fa-user-slash" style="font-size:3rem;margin-bottom:16px;opacity:0.5"></i>
+                <p>You have no assigned members currently.</p>
+            </div>
+        }
+        else
+        {
+            <div class="grid-2">
+                @foreach (var a in Model.Assignments)
+                {
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;align-items:center;gap:16px">
+                            <div class="avatar avatar-lg">
+                                @if (!string.IsNullOrEmpty(a.MemberPhoto))
+                                { <img src="@a.MemberPhoto" alt="@a.MemberName" /> }
+                                else { @a.MemberName.FirstOrDefault() }
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem;font-weight:700">@a.MemberName</h4>
+                                <span style="font-size:0.8rem;color:var(--text-muted)">Assigned: @a.AssignedDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                        <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:12px">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="assignmentId" value="@a.Id" />
+                            <div class="form-group" style="margin:0">
+                                <label class="form-label">Workout Plan URL / Link</label>
+                                <input type="url" name="workoutPlan" class="form-control" value="@a.WorkoutPlan" placeholder="https://docs.google.com/..." />
+                            </div>
+                            <div class="form-group" style="margin:0">
+                                <label class="form-label">Training Notes & Goals</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Member's current goals and progress...">@a.TrainingNotes</textarea>
+                            </div>
+                            <button type="submit" class="btn-primary btn-sm" style="align-self:flex-end">Save Plan</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

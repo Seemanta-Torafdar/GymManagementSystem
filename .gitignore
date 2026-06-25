@@ -1,0 +1,35 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/settings.json
+
+## Secrets & config overrides
+appsettings.Development.json
+**/secrets.json
+
+## Published output
+publish/
+out/
+
+## Uploaded user files (not versioned)
+GymManagement/wwwroot/uploads/
+
+## Entity Framework migrations (optional - remove if you want to version them)
+# */Migrations/
+
+## NuGet
+*.nupkg
+.nuget/
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Large generated images
+Gemini_Generated_Image_*.png
+*.png

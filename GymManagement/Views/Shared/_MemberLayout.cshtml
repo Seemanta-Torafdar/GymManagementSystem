@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Member | PowerFit Gym</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dashboard-layout member-theme">
+    <aside class="sidebar" id="sidebar">
+        <a asp-controller="Home" asp-action="Index" class="sidebar-brand" style="text-decoration:none;color:inherit;">
+            <span class="brand-icon"><i class="fas fa-dumbbell"></i></span>
+            <span class="brand-name">PowerFit<span class="accent">Gym</span></span>
+        </a>
+        <nav class="sidebar-nav">
+            <div class="nav-group">
+                <a asp-controller="Member" asp-action="Dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="fas fa-home"></i><span>Dashboard</span>
+                </a>
+                <a asp-controller="Member" asp-action="Profile" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                    <i class="fas fa-user"></i><span>My Profile</span>
+                </a>
+                <a asp-controller="Member" asp-action="Schedule" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Schedule" ? "active" : "")">
+                    <i class="fas fa-calendar-check"></i><span>My Schedule</span>
+                </a>
+                <a asp-controller="Member" asp-action="Notifications" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Notifications" ? "active" : "")">
+                    <i class="fas fa-bell"></i><span>Notifications</span>
+                    @if (ViewBag.UnreadCount != null && (int)ViewBag.UnreadCount > 0)
+                    {
+                        <span class="badge-count">@ViewBag.UnreadCount</span>
+                    }
+                </a>
+                <a asp-controller="Account" asp-action="ChangePassword" class="nav-item">
+                    <i class="fas fa-lock"></i><span>Change Password</span>
+                </a>
+            </div>
+            <div class="nav-group">
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="nav-item nav-logout">
+                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </aside>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <div class="top-bar-title">@ViewData["Title"]</div>
+            <div class="top-bar-actions">
+                <span class="member-badge"><i class="fas fa-dumbbell"></i> Member</span>
+            </div>
+        </header>
+        <main class="content-area">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert-toast alert-success" id="alertToast"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert-toast alert-error" id="alertToast"><i class="fas fa-exclamation-circle"></i> @TempData["Error"]</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin | PowerFit Gym</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <a asp-controller="Home" asp-action="Index" class="sidebar-brand" style="text-decoration:none;color:inherit;">
+            <span class="brand-icon"><i class="fas fa-dumbbell"></i></span>
+            <span class="brand-name">PowerFit<span class="accent">Gym</span></span>
+        </a>
+        <nav class="sidebar-nav">
+            <div class="nav-group">
+                <span class="nav-label">Overview</span>
+                <a asp-controller="Admin" asp-action="Dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-group">
+                <span class="nav-label">Management</span>
+                <a asp-controller="Admin" asp-action="Members" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Member") == true ? "active" : "")">
+                    <i class="fas fa-users"></i><span>Members</span>
+                </a>
+                <a asp-controller="Admin" asp-action="Trainers" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Trainer") == true ? "active" : "")">
+                    <i class="fas fa-user-tie"></i><span>Trainers</span>
+                </a>
+                <a asp-controller="Admin" asp-action="Memberships" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Package") == true || ViewContext.RouteData.Values["action"]?.ToString() == "Memberships" ? "active" : "")">
+                    <i class="fas fa-id-card"></i><span>Packages</span>
+                </a>
+                <a asp-controller="Admin" asp-action="Schedules" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Schedules" ? "active" : "")">
+                    <i class="fas fa-calendar-alt"></i><span>Schedules</span>
+                </a>
+                <a asp-controller="Admin" asp-action="Equipment" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Equipment") == true ? "active" : "")">
+                    <i class="fas fa-dumbbell"></i><span>Equipment</span>
+                </a>
+            </div>
+            <div class="nav-group">
+                <span class="nav-label">Finance</span>
+                <a asp-controller="Admin" asp-action="Payments" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Payments" ? "active" : "")">
+                    <i class="fas fa-money-bill-wave"></i><span>Payments</span>
+                </a>
+                <a asp-controller="Admin" asp-action="TrainerPayments" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "TrainerPayments" ? "active" : "")">
+                    <i class="fas fa-wallet"></i><span>Trainer Salaries</span>
+                </a>
+            </div>
+            <div class="nav-group">
+                <span class="nav-label">System</span>
+                <a asp-controller="Admin" asp-action="Settings" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
+                    <i class="fas fa-cog"></i><span>Settings</span>
+                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="nav-item nav-logout">
+                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="top-bar-title">@ViewData["Title"]</div>
+            <div class="top-bar-actions">
+                <span class="admin-badge"><i class="fas fa-shield-halved"></i> Admin</span>
+                <span class="admin-name">@User.Identity?.Name?.Split('@')[0]</span>
+            </div>
+        </header>
+
+        <main class="content-area">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert-toast alert-success" id="alertToast">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert-toast alert-error" id="alertToast">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                </div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

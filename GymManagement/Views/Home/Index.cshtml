@@ -1,0 +1,379 @@
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_Layout";
+    var packages = ViewBag.Packages as IEnumerable<BLL.DTOs.MembershipPackageDTO> ?? Enumerable.Empty<BLL.DTOs.MembershipPackageDTO>();
+    var trainers = ViewBag.Trainers as IEnumerable<BLL.DTOs.TrainerDTO> ?? Enumerable.Empty<BLL.DTOs.TrainerDTO>();
+    var equipment = ViewBag.Equipment as IEnumerable<BLL.DTOs.EquipmentDTO> ?? Enumerable.Empty<BLL.DTOs.EquipmentDTO>();
+    var shifts = ViewBag.Shifts as IEnumerable<BLL.DTOs.GymShiftDTO> ?? Enumerable.Empty<BLL.DTOs.GymShiftDTO>();
+    var yogas = ViewBag.YogaSchedules as IEnumerable<BLL.DTOs.YogaScheduleDTO> ?? Enumerable.Empty<BLL.DTOs.YogaScheduleDTO>();
+    var cardios = ViewBag.CardioSchedules as IEnumerable<BLL.DTOs.CardioScheduleDTO> ?? Enumerable.Empty<BLL.DTOs.CardioScheduleDTO>();
+    var settings = ViewBag.GymSettings as BLL.DTOs.GymSettingDTO;
+    string gymName = settings?.GymName ?? "PowerFit Gym";
+}
+
+<!-- HERO SECTION -->
+<section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="hero-content container">
+        <div class="hero-text">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i> #1 Fitness Center in the City
+            </div>
+            <h1 class="hero-title">
+                Transform Your<br /><span class="highlight">Body &amp; Life</span><br />Today
+            </h1>
+            <p class="hero-subtitle">
+                @(settings?.HeroTagline ?? "World-class equipment, expert trainers, and a community that pushes you to your limits. Your fitness journey starts here.")
+            </p>
+            <div class="hero-cta">
+                <a asp-controller="Account" asp-action="Register" class="btn-primary">
+                    <i class="fas fa-dumbbell"></i> Start Today
+                </a>
+                <a href="#packages" class="btn-secondary">
+                    <i class="fas fa-star"></i> View Packages
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="number count-up" data-target="500">500</div>
+                    <div class="label">Members</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number count-up" data-target="15">15</div>
+                    <div class="label">Trainers</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number count-up" data-target="50">50</div>
+                    <div class="label">Equipment</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number count-up" data-target="5">5</div>
+                    <div class="label">Years</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-img-wrapper">
+                <i class="fas fa-dumbbell gym-icon-hero"></i>
+                <img src="/images/gym-hero.jpg" alt="PowerFit Gym" />
+            </div>
+            <div class="hero-floating-card card1">
+                <div class="icon"><i class="fas fa-fire-flame-curved"></i></div>
+                <div class="info">
+                    <strong>500+ kcal</strong>
+                    <span>avg. burned/session</span>
+                </div>
+            </div>
+            <div class="hero-floating-card card2">
+                <div class="icon"><i class="fas fa-trophy"></i></div>
+                <div class="info">
+                    <strong>4.9 ★</strong>
+                    <span>Member Rating</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section class="about-section" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-text-side reveal">
+                <span class="about-badge">About Us</span>
+                <h2 class="about-title">More Than Just a Gym — It's a Lifestyle</h2>
+                <p class="about-text">@(settings?.AboutUs ?? "PowerFit Gym is a state-of-the-art fitness center dedicated to helping you achieve your health and fitness goals. With world-class equipment, expert trainers, and a motivating environment.")</p>
+                <div class="about-features">
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-dumbbell"></i></div>
+                        <div class="about-feature-text"><strong>Premium Equipment</strong><span>50+ world-class machines</span></div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-user-tie"></i></div>
+                        <div class="about-feature-text"><strong>Expert Trainers</strong><span>Certified professionals</span></div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-clock"></i></div>
+                        <div class="about-feature-text"><strong>Flexible Hours</strong><span>Open 6am – 10pm daily</span></div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-heart-pulse"></i></div>
+                        <div class="about-feature-text"><strong>Health Focused</strong><span>Nutrition &amp; wellness support</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-img-side reveal">
+                <div class="about-img-grid">
+                    <div class="about-img-item tall"><i class="fas fa-weight-hanging"></i></div>
+                    <div class="about-img-item"><i class="fas fa-running"></i></div>
+                    <div class="about-img-item"><i class="fas fa-spa"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MEMBERSHIP PACKAGES -->
+<section id="packages">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Membership</span>
+            <h2 class="section-title">Choose Your Plan</h2>
+            <p class="section-subtitle">Flexible packages designed to fit your goals and budget. No hidden fees.</p>
+        </div>
+        <div class="grid-4 reveal">
+            @{int pkgIdx = 0;}
+            @foreach (var pkg in packages)
+            {
+                bool isPopular = pkgIdx == 1;
+                <div class="package-card @(isPopular ? "popular" : "")">
+                    @if (isPopular) { <span class="popular-badge">Most Popular</span> }
+                    <div class="package-name">@pkg.Name</div>
+                    <div class="package-duration"><i class="fas fa-calendar-days"></i> @pkg.DurationDays days</div>
+                    <div class="package-price">
+                        <span class="currency">৳</span><span class="amount">@pkg.Price.ToString("N0")</span>
+                        <span class="period"> / package</span>
+                    </div>
+                    <ul class="package-benefits">
+                        @foreach (var benefit in pkg.BenefitList)
+                        {
+                            <li><i class="fas fa-check-circle"></i> @benefit</li>
+                        }
+                    </ul>
+                    <a asp-controller="Account" asp-action="Register" class="btn-primary" style="text-align:center;display:block">
+                        Get Started
+                    </a>
+                </div>
+                pkgIdx++;
+            }
+        </div>
+    </div>
+</section>
+
+<!-- SCHEDULES -->
+<section class="schedule-section" id="schedules">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Schedules</span>
+            <h2 class="section-title">Class Timetable</h2>
+            <p class="section-subtitle">Find the perfect time for your workout with our flexible class schedules.</p>
+        </div>
+        <div class="reveal">
+            <div class="schedule-tabs">
+                <button class="tab-btn active" data-tab="tab-shifts">Gym Shifts</button>
+                <button class="tab-btn" data-tab="tab-yoga">Yoga Classes</button>
+                <button class="tab-btn" data-tab="tab-cardio">Cardio Classes</button>
+            </div>
+            <div id="tab-shifts" class="tab-content active">
+                <table class="schedule-table">
+                    <thead><tr><th>Shift</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Description</th></tr></thead>
+                    <tbody>
+                        @foreach (var s in shifts)
+                        {
+                            <tr>
+                                <td><strong>@s.ShiftName</strong></td>
+                                <td><i class="fas fa-clock" style="color:var(--accent)"></i> @s.StartTime.ToString(@"hh\:mm")</td>
+                                <td>@s.EndTime.ToString(@"hh\:mm")</td>
+                                <td><i class="fas fa-users" style="color:var(--accent)"></i> @s.Capacity members</td>
+                                <td>@s.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div id="tab-yoga" class="tab-content">
+                <table class="schedule-table">
+                    <thead><tr><th>Class</th><th>Days</th><th>Time</th><th>Instructor</th><th>Capacity</th></tr></thead>
+                    <tbody>
+                        @foreach (var y in yogas)
+                        {
+                            <tr>
+                                <td><strong>@y.ClassName</strong></td>
+                                <td>@y.DayOfWeek</td>
+                                <td>@y.StartTime.ToString(@"hh\:mm") – @y.EndTime.ToString(@"hh\:mm")</td>
+                                <td><i class="fas fa-user" style="color:var(--accent)"></i> @y.Instructor</td>
+                                <td>@y.Capacity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div id="tab-cardio" class="tab-content">
+                <table class="schedule-table">
+                    <thead><tr><th>Class</th><th>Days</th><th>Time</th><th>Instructor</th><th>Equipment</th></tr></thead>
+                    <tbody>
+                        @foreach (var c in cardios)
+                        {
+                            <tr>
+                                <td><strong>@c.ClassName</strong></td>
+                                <td>@c.DayOfWeek</td>
+                                <td>@c.StartTime.ToString(@"hh\:mm") – @c.EndTime.ToString(@"hh\:mm")</td>
+                                <td><i class="fas fa-user" style="color:var(--accent)"></i> @c.Instructor</td>
+                                <td>@c.EquipmentUsed</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TRAINERS -->
+<section id="trainers">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Our Experts</span>
+            <h2 class="section-title">Meet Our Trainers</h2>
+            <p class="section-subtitle">Certified professionals dedicated to helping you achieve your fitness goals.</p>
+        </div>
+        <div class="grid-3 reveal">
+            @foreach (var trainer in trainers)
+            {
+                <div class="trainer-card">
+                    <div class="trainer-photo">
+                        @if (!string.IsNullOrEmpty(trainer.ProfilePhoto))
+                        {
+                            <img src="@trainer.ProfilePhoto" alt="@trainer.FullName" />
+                        }
+                        else
+                        {
+                            <i class="fas fa-user-tie photo-placeholder"></i>
+                        }
+                    </div>
+                    <div class="trainer-info">
+                        <div class="trainer-name">@trainer.FullName</div>
+                        <div class="trainer-spec">@trainer.Specialization</div>
+                        <div class="trainer-meta">
+                            <div class="trainer-meta-item"><i class="fas fa-briefcase"></i> @trainer.Experience yrs exp</div>
+                            <div class="trainer-meta-item"><i class="fas fa-users"></i> @trainer.AssignedMembersCount members</div>
+                        </div>
+                        <div class="star-rating">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <i class="fas fa-star star @(s <= trainer.AverageRating ? "" : "empty")"></i>
+                            }
+                            <span class="rating-text">@trainer.AverageRating (@trainer.TotalReviews reviews)</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.9rem;color:var(--accent);font-weight:700;">৳@trainer.MonthlySalary.ToString("N0")/mo</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- EQUIPMENT -->
+<section id="equipment" style="background:var(--bg-secondary)">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Equipment</span>
+            <h2 class="section-title">World-Class Equipment</h2>
+            <p class="section-subtitle">Train with the best. Our facility is equipped with premium fitness machines.</p>
+        </div>
+        <div class="grid-3 reveal">
+            @foreach (var eq in equipment)
+            {
+                <div class="equipment-card">
+                    <div class="equipment-img">
+                        @if (!string.IsNullOrEmpty(eq.ImagePath))
+                        {
+                            <img src="@eq.ImagePath" alt="@eq.Name" />
+                        }
+                        else
+                        {
+                            <i class="fas fa-dumbbell eq-icon"></i>
+                        }
+                    </div>
+                    <div class="equipment-info">
+                        <div class="equipment-name">@eq.Name</div>
+                        <div class="equipment-desc">@eq.Description</div>
+                        @if (!string.IsNullOrEmpty(eq.Category))
+                        {
+                            <span class="equipment-category">@eq.Category</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Contact</span>
+            <h2 class="section-title">Get in Touch</h2>
+            <p class="section-subtitle">Ready to start? Visit us or reach out — we'd love to help.</p>
+        </div>
+        <div class="contact-grid reveal">
+            <div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="contact-text"><strong>Address</strong><span>@(settings?.Address ?? "123 Fitness Street, Gulshan-1, Dhaka 1212")</span></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <div class="contact-text"><strong>Phone</strong><span>@(settings?.Phone ?? "+880 1712-345678")</span></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-text"><strong>Email</strong><span>@(settings?.Email ?? "info@powerfitgym.com")</span></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                    <div class="contact-text"><strong>Hours</strong><span>Open 6:00 AM – 10:00 PM, 7 days a week</span></div>
+                </div>
+                <div style="margin-top:32px;display:flex;gap:12px">
+                    <a asp-controller="Account" asp-action="Register" class="btn-primary"><i class="fas fa-dumbbell"></i> Join Now</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn-outline"><i class="fas fa-sign-in-alt"></i> Member Login</a>
+                </div>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>123 Fitness Street, Gulshan-1, Dhaka</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+// Spawn glowing particles in hero
+(function() {
+    const container = document.getElementById('heroParticles');
+    if (!container) return;
+    for (let i = 0; i < 28; i++) {
+        const span = document.createElement('span');
+        const size = Math.random() * 3 + 1;
+        span.style.cssText = `
+            left:${Math.random()*100}%;
+            top:${Math.random()*100}%;
+            width:${size}px; height:${size}px;
+            animation-delay:${Math.random()*6}s;
+            animation-duration:${6+Math.random()*6}s;
+            opacity:${Math.random()*0.6+0.2};
+        `;
+        container.appendChild(span);
+    }
+})();
+
+// Count-up animation for hero stats
+window.addEventListener('load', () => {
+    document.querySelectorAll('.count-up').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        let c = 0;
+        const step = Math.max(1, target / 80);
+        const t = setInterval(() => {
+            c += step;
+            if (c >= target) { el.textContent = target + '+'; clearInterval(t); }
+            else el.textContent = Math.floor(c);
+        }, 18);
+    });
+});
+</script>
+}

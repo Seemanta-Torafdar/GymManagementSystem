@@ -1,0 +1,47 @@
+@model IEnumerable<BLL.DTOs.NotificationDTO>
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "_TrainerLayout";
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-bell" style="color:var(--accent)"></i> Notifications</h1>
+        <p>Your recent alerts and messages.</p>
+    </div>
+</div>
+
+<div class="card" style="padding:0">
+    <div style="padding:20px;border-bottom:1px solid var(--border)">
+        <h3 style="font-size:1.1rem;font-weight:700">Recent Notifications</h3>
+    </div>
+    <div style="padding:0">
+        @if (!Model.Any())
+        {
+            <div style="text-align:center;color:var(--text-muted);padding:40px">
+                <i class="fas fa-bell-slash" style="font-size:3rem;margin-bottom:16px;opacity:0.5"></i>
+                <p>You have no notifications.</p>
+            </div>
+        }
+        else
+        {
+            <div style="display:flex;flex-direction:column">
+                @foreach (var n in Model)
+                {
+                    <div style="padding:20px 24px;border-bottom:1px solid var(--border);background:@(n.IsRead ? "transparent" : "rgba(234,179,8,0.05)")">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                            <strong style="font-size:1rem;color:var(--text-primary)">
+                                @if(n.Type == "Warning") { <i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:6px"></i> }
+                                else if(n.Type == "Success") { <i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i> }
+                                else { <i class="fas fa-info-circle" style="color:#3b82f6;margin-right:6px"></i> }
+                                @n.Title
+                            </strong>
+                            <span style="font-size:0.8rem;color:var(--text-muted)">@n.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</span>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;margin:0">@n.Message</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model BLL.DTOs.EquipmentDTO
+@{
+    ViewData["Title"] = "Edit Equipment";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <a asp-action="Equipment" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Equipment</a>
+        <h1><i class="fas fa-dumbbell" style="color:var(--accent)"></i> Edit Equipment</h1>
+    </div>
+</div>
+
+<div class="form-card" style="max-width:800px">
+    <form asp-action="EditEquipment" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImagePath" />
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">Equipment Name</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category" class="form-label">Category</label>
+                <select asp-for="Category" class="form-control">
+                    <option value="Cardio">Cardio</option>
+                    <option value="Strength Machines">Strength Machines</option>
+                    <option value="Free Weights">Free Weights</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Category" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Quantity" class="form-label">Total Quantity</label>
+                <input asp-for="Quantity" type="number" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Update Image <span class="form-optional">(leave empty to keep current)</span></label>
+                <input type="file" name="imageFile" class="form-control" accept="image/*" />
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2; padding-top: 10px; border-top: 1px solid var(--border)">
+                <h4 style="margin-bottom: 12px; font-size: 0.9rem">Inventory Details</h4>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="PurchasePrice" class="form-label">Total Purchase Price (৳)</label>
+                <input asp-for="PurchasePrice" type="number" step="0.01" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Supplier" class="form-label">Supplier / Vendor</label>
+                <input asp-for="Supplier" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="PurchaseDate" class="form-label">Purchase Date</label>
+                <input asp-for="PurchaseDate" type="date" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="StockStatus" class="form-label">Stock Status</label>
+                <select asp-for="StockStatus" class="form-control">
+                    <option value="Available">Available</option>
+                    <option value="Low">Low</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                    <option value="Under Maintenance">Under Maintenance</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin-top:30px;display:flex;gap:12px">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+            <a asp-action="Equipment" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

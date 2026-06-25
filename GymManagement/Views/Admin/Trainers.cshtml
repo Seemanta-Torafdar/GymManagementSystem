@@ -1,0 +1,56 @@
+@model IEnumerable<BLL.DTOs.TrainerDTO>
+@{
+    ViewData["Title"] = "Trainers";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-user-tie" style="color:var(--accent)"></i> Trainers</h1>
+        <p>Manage all trainers and their assignments</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="CreateTrainer" class="btn-primary"><i class="fas fa-plus"></i> Add Trainer</a>
+    </div>
+</div>
+
+<div class="grid-3" style="margin-bottom:24px">
+    @foreach (var t in Model)
+    {
+        <div class="card" style="padding:0;overflow:hidden">
+            <div style="background:linear-gradient(135deg,rgba(230,57,70,0.1),transparent);padding:24px;display:flex;gap:16px;align-items:flex-start">
+                <div class="avatar avatar-lg">
+                    @if (!string.IsNullOrEmpty(t.ProfilePhoto))
+                    { <img src="@t.ProfilePhoto" alt="@t.FullName" /> }
+                    else { @t.FirstName.FirstOrDefault() }
+                </div>
+                <div style="flex:1">
+                    <div style="font-size:1rem;font-weight:700">@t.FullName</div>
+                    <div style="font-size:0.78rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">@t.Specialization</div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                        <span style="font-size:0.8rem;color:var(--text-muted)"><i class="fas fa-briefcase" style="color:var(--accent)"></i> @t.Experience yrs</span>
+                        <span style="font-size:0.8rem;color:var(--text-muted)"><i class="fas fa-users" style="color:var(--accent)"></i> @t.AssignedMembersCount members</span>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid var(--border)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <div class="star-rating">
+                        @for (int s = 1; s <= 5; s++)
+                        { <i class="fas fa-star star @(s <= t.AverageRating ? "" : "empty")"></i> }
+                        <span class="rating-text">@t.AverageRating (@t.TotalReviews)</span>
+                    </div>
+                    <span style="font-size:0.9rem;font-weight:700;color:#4ade80">৳@t.MonthlySalary.ToString("N0")</span>
+                </div>
+                <div class="table-actions">
+                    <a asp-action="TrainerDetails" asp-route-id="@t.Id" class="btn-sm-accent"><i class="fas fa-eye"></i> View</a>
+                    <a asp-action="EditTrainer" asp-route-id="@t.Id" class="btn-sm btn-secondary"><i class="fas fa-pencil"></i></a>
+                    <form asp-action="DeleteTrainer" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@t.Id" />
+                        <button type="submit" class="btn-danger btn-sm" data-confirm="Delete trainer @t.FullName?"><i class="fas fa-trash"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,171 @@
+@model BLL.DTOs.MemberDTO
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_MemberLayout";
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-user-circle" style="color:var(--accent)"></i> My Profile</h1>
+        <p>Manage your personal information and account security.</p>
+    </div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:1fr 320px;align-items:start;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:24px">
+        <!-- Membership Info Banner -->
+        @if (Model.ActivePackageName != null)
+        {
+            <div style="background:linear-gradient(135deg,rgba(245,197,24,0.12),rgba(245,197,24,0.04));border:1px solid rgba(245,197,24,0.3);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px">
+                <i class="fas fa-id-card" style="font-size:2rem;color:var(--accent)"></i>
+                <div>
+                    <div style="font-weight:800;font-size:1.1rem;color:var(--text-primary)">@Model.ActivePackageName</div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">
+                        Expires: @Model.MembershipEndDate?.ToString("MMMM dd, yyyy") &nbsp;|&nbsp;
+                        <span style="color:@(Model.RemainingDays > 7 ? "#4ade80" : "#f87171")">
+                            @Model.RemainingDays days remaining
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Edit Profile -->
+        <div class="form-card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-pencil"></i> Personal Information</h3>
+            <form asp-action="UpdateProfile" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" name="FirstName" class="form-control" value="@Model.FirstName" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" name="LastName" class="form-control" value="@Model.LastName" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" name="Phone" class="form-control" value="@Model.Phone" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <select name="Gender" class="form-control" required>
+                            <option value="Male" selected="@(Model.Gender=="Male")">Male</option>
+                            <option value="Female" selected="@(Model.Gender=="Female")">Female</option>
+                            <option value="Other" selected="@(Model.Gender=="Other")">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" name="DateOfBirth" class="form-control" value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Blood Group</label>
+                        <select name="BloodGroup" class="form-control">
+                            <option value="">Select</option>
+                            @foreach (var bg in new[]{"A+","A-","B+","B-","O+","O-","AB+","AB-"})
+                            {
+                                <option value="@bg" selected="@(Model.BloodGroup==bg)">@bg</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column:span 2">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="Address" class="form-control" value="@Model.Address" placeholder="Your address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Emergency Contact Name</label>
+                        <input type="text" name="EmergencyContact" class="form-control" value="@Model.EmergencyContact" placeholder="Jane Doe" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Emergency Contact Phone</label>
+                        <input type="text" name="EmergencyPhone" class="form-control" value="@Model.EmergencyPhone" placeholder="01712-000000" />
+                    </div>
+                    <div class="form-group" style="grid-column:span 2">
+                        <label class="form-label">Medical Notes <span class="form-optional">(optional)</span></label>
+                        <textarea name="MedicalNotes" class="form-control" rows="2" placeholder="Any relevant medical information...">@Model.MedicalNotes</textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top:8px">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="form-card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-lock"></i> Change Password</h3>
+            <form asp-controller="Account" asp-action="ChangePassword" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column:span 2">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="CurrentPassword" class="form-control" placeholder="Enter current password" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="NewPassword" class="form-control" placeholder="Min 6 characters" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="ConfirmNewPassword" class="form-control" placeholder="Repeat new password" required />
+                    </div>
+                </div>
+                <button type="submit" class="btn-secondary" style="margin-top:8px">
+                    <i class="fas fa-shield-alt"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div style="display:flex;flex-direction:column;gap:24px">
+        <!-- Profile Photo -->
+        <div class="form-card" style="text-align:center">
+            <h3 class="form-section-title" style="margin-top:0;text-align:left"><i class="fas fa-image"></i> Profile Photo</h3>
+            <div class="avatar avatar-xl" style="margin:0 auto 16px;width:120px;height:120px;font-size:2.5rem">
+                @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+                { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+                else { @Model.FirstName.FirstOrDefault() }
+            </div>
+            <div style="font-weight:700;margin-bottom:4px">@Model.FullName</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px">@Model.Email</div>
+            <form asp-action="UploadPhoto" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <input type="file" name="photo" class="form-control" accept="image/*" required />
+                </div>
+                <button type="submit" class="btn-secondary" style="width:100%">
+                    <i class="fas fa-upload"></i> Upload Photo
+                </button>
+            </form>
+        </div>
+
+        <!-- Member Info -->
+        <div class="form-card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-info-circle"></i> Member Info</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted)">Member Since</span>
+                    <span style="font-weight:600">@Model.JoinDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted)">Gym Shift</span>
+                    <span style="font-weight:600">@(Model.ShiftName ?? "—")</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted)">Trainer</span>
+                    <span style="font-weight:600">@(Model.AssignedTrainerName ?? "Not Assigned")</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted)">Status</span>
+                    <span class="badge @(Model.IsActive ? "badge-success" : "badge-danger")">
+                        @(Model.IsActive ? "Active" : "Inactive")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

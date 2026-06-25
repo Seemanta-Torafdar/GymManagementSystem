@@ -1,0 +1,173 @@
+@model GymManagement.ViewModels.Account.RegisterVM
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+    var packages = ViewBag.Packages as IEnumerable<BLL.DTOs.MembershipPackageDTO> ?? Enumerable.Empty<BLL.DTOs.MembershipPackageDTO>();
+    var shifts = ViewBag.Shifts as IEnumerable<BLL.DTOs.GymShiftDTO> ?? Enumerable.Empty<BLL.DTOs.GymShiftDTO>();
+    var yogas = ViewBag.YogaSchedules as IEnumerable<BLL.DTOs.YogaScheduleDTO> ?? Enumerable.Empty<BLL.DTOs.YogaScheduleDTO>();
+    var cardios = ViewBag.CardioSchedules as IEnumerable<BLL.DTOs.CardioScheduleDTO> ?? Enumerable.Empty<BLL.DTOs.CardioScheduleDTO>();
+}
+<div class="auth-page" style="padding:100px 24px 40px">
+    <div class="auth-bg"></div>
+    <div class="auth-card wide">
+        <div class="auth-logo">
+            <i class="fas fa-dumbbell brand-icon"></i>
+            <span class="brand-name">PowerFit<span class="accent">Gym</span></span>
+        </div>
+        <h1 class="auth-title">Join PowerFit Gym</h1>
+        <p class="auth-subtitle">Create your account and start your fitness journey today</p>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert-toast alert-error"></div>
+
+            <!-- Personal Info -->
+            <div class="form-section-title"><i class="fas fa-user"></i> Personal Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="FirstName">First Name</label>
+                    <input asp-for="FirstName" class="form-control" placeholder="John" id="reg-firstname" />
+                    <span asp-validation-for="FirstName" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="LastName">Last Name</label>
+                    <input asp-for="LastName" class="form-control" placeholder="Doe" id="reg-lastname" />
+                    <span asp-validation-for="LastName" class="field-error"></span>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Email">Email Address</label>
+                    <input asp-for="Email" class="form-control" placeholder="john@email.com" id="reg-email" type="email" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Phone">Phone Number</label>
+                    <input asp-for="Phone" class="form-control" placeholder="01712-345678" id="reg-phone" />
+                    <span asp-validation-for="Phone" class="field-error"></span>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Gender">Gender</label>
+                    <select asp-for="Gender" class="form-control" id="reg-gender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="DateOfBirth">Date of Birth</label>
+                    <input asp-for="DateOfBirth" class="form-control" type="date" id="reg-dob" />
+                    <span asp-validation-for="DateOfBirth" class="field-error"></span>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="BloodGroup">Blood Group <span class="form-optional">(optional)</span></label>
+                    <select asp-for="BloodGroup" class="form-control" id="reg-blood">
+                        <option value="">Select</option>
+                        @foreach(var bg in new[]{"A+","A-","B+","B-","O+","O-","AB+","AB-"})
+                        {
+                            <option value="@bg">@bg</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Address">Address <span class="form-optional">(optional)</span></label>
+                    <input asp-for="Address" class="form-control" placeholder="Your address" id="reg-address" />
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="EmergencyContact">Emergency Contact Name <span class="form-optional">(optional)</span></label>
+                    <input asp-for="EmergencyContact" class="form-control" placeholder="Jane Doe" id="reg-emgname" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="EmergencyPhone">Emergency Contact Phone <span class="form-optional">(optional)</span></label>
+                    <input asp-for="EmergencyPhone" class="form-control" placeholder="01712-000000" id="reg-emgphone" />
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-section-title"><i class="fas fa-lock"></i> Account Security</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Password">Password</label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="Min 6 characters" id="reg-pass" />
+                    <span asp-validation-for="Password" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="ConfirmPassword">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Repeat password" id="reg-pass2" />
+                    <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                </div>
+            </div>
+
+            <!-- Membership -->
+            <div class="form-section-title"><i class="fas fa-id-card"></i> Membership Selection</div>
+            <div class="form-group">
+                <label class="form-label">Choose Your Package <span style="color:var(--accent)">*</span></label>
+                <div class="pkg-select-grid">
+                    @foreach (var pkg in packages)
+                    {
+                        <div>
+                            <input type="radio" asp-for="PackageId" value="@pkg.Id" class="pkg-radio" id="pkg-@pkg.Id" />
+                            <label class="pkg-label" for="pkg-@pkg.Id">
+                                <div class="pkg-name">@pkg.Name</div>
+                                <div class="pkg-price">৳@pkg.Price.ToString("N0")</div>
+                                <div class="pkg-dur">@pkg.DurationDays days</div>
+                            </label>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="PackageId" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="ShiftId">Gym Shift <span style="color:var(--accent)">*</span></label>
+                <select asp-for="ShiftId" class="form-control" id="reg-shift">
+                    <option value="">— Select a shift —</option>
+                    @foreach (var s in shifts)
+                    {
+                        <option value="@s.Id">@s.ShiftName (@s.TimeRange)</option>
+                    }
+                </select>
+                <span asp-validation-for="ShiftId" class="field-error"></span>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="YogaScheduleId">Yoga Class <span class="form-optional">(optional)</span></label>
+                    <select asp-for="YogaScheduleId" class="form-control" id="reg-yoga">
+                        <option value="">— No yoga class —</option>
+                        @foreach (var y in yogas)
+                        {
+                            <option value="@y.Id">@y.ClassName (@y.DayOfWeek)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="CardioScheduleId">Cardio Class <span class="form-optional">(optional)</span></label>
+                    <select asp-for="CardioScheduleId" class="form-control" id="reg-cardio">
+                        <option value="">— No cardio class —</option>
+                        @foreach (var c in cardios)
+                        {
+                            <option value="@c.Id">@c.ClassName (@c.DayOfWeek)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="reg-submit" style="width:100%;justify-content:center;border-radius:var(--radius-sm);margin-top:8px;padding:14px">
+                <i class="fas fa-dumbbell"></i> Create My Account
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a asp-controller="Account" asp-action="Login">Login here</a></p>
+        </div>
+    </div>
+</div>

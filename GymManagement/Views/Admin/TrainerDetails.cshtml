@@ -1,0 +1,67 @@
+@model BLL.DTOs.TrainerDTO
+@{
+    ViewData["Title"] = "Trainer Details";
+    Layout = "_AdminLayout";
+    var reviews = ViewBag.Reviews as IEnumerable<BLL.DTOs.ReviewDTO> ?? new List<BLL.DTOs.ReviewDTO>();
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <a asp-action="Trainers" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Trainers</a>
+        <h1>@Model.FullName</h1>
+        <p>@Model.Specialization</p>
+    </div>
+</div>
+
+<div class="grid-3">
+    <div class="card" style="grid-column: span 1">
+        <div class="avatar avatar-xl" style="margin:0 auto 20px">
+            @if (!string.IsNullOrEmpty(Model.ProfilePhoto)) { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+            else { @Model.FirstName.FirstOrDefault() }
+        </div>
+        <h2 style="text-align:center;font-size:1.4rem;font-weight:800">@Model.FullName</h2>
+        <div style="text-align:center;color:var(--accent);font-size:0.85rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px">@Model.Specialization</div>
+        
+        <div style="display:flex;justify-content:center;gap:12px;margin-bottom:24px">
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.AssignedMembersCount</div><div style="font-size:0.75rem;color:var(--text-muted)">Students</div></div>
+            <div style="width:1px;background:var(--border)"></div>
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.Experience</div><div style="font-size:0.75rem;color:var(--text-muted)">Years Exp</div></div>
+            <div style="width:1px;background:var(--border)"></div>
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.AverageRating</div><div style="font-size:0.75rem;color:var(--text-muted)">Rating</div></div>
+        </div>
+        
+        <div style="padding:16px;background:var(--bg-input);border-radius:var(--radius-sm);margin-bottom:20px">
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px">Monthly Salary</div>
+            <div style="font-size:1.5rem;font-weight:800;color:#4ade80">৳@Model.MonthlySalary.ToString("N0")</div>
+        </div>
+    </div>
+    
+    <div style="grid-column: span 2; display:flex; flex-direction:column; gap:24px">
+        <div class="card">
+            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">About & Certifications</h3>
+            <p style="color:var(--text-secondary);margin-bottom:20px">@Model.Bio</p>
+            <div style="font-weight:600;margin-bottom:8px">Certifications</div>
+            <p style="color:var(--text-muted)">@Model.Certifications</p>
+        </div>
+        
+        <div class="card">
+            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">Recent Reviews</h3>
+            @if(reviews.Any()) {
+                <div style="display:flex;flex-direction:column;gap:16px">
+                    @foreach(var r in reviews) {
+                        <div style="padding:16px;background:var(--bg-input);border-radius:var(--radius-sm)">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                                <strong>@r.MemberName</strong>
+                                <div class="star-rating">
+                                    @for(int s=1; s<=5; s++) { <i class="fas fa-star star @(s<=r.Rating?"":"empty")"></i> }
+                                </div>
+                            </div>
+                            <p style="font-size:0.9rem;color:var(--text-secondary)">"@r.Comment"</p>
+                        </div>
+                    }
+                </div>
+            } else {
+                <p style="color:var(--text-muted)">No reviews yet.</p>
+            }
+        </div>
+    </div>
+</div>

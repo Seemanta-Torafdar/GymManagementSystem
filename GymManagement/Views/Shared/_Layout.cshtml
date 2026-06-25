@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PowerFit Gym - Transform Your Body, Transform Your Life" />
+    <title>@ViewData["Title"] - PowerFit Gym</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="public-layout">
+
+    <!-- Navbar -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <a class="nav-brand" href="/">
+                <span class="brand-icon"><i class="fas fa-dumbbell"></i></span>
+                <span class="brand-name">PowerFit<span class="accent">Gym</span></span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/#about">About</a></li>
+                <li><a href="/#packages">Packages</a></li>
+                <li><a href="/#schedules">Schedules</a></li>
+                <li><a href="/#trainers">Trainers</a></li>
+                <li><a href="/#equipment">Equipment</a></li>
+                <li><a href="/#contact">Contact</a></li>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li><a asp-controller="Admin" asp-action="Dashboard" class="btn-nav-primary">Dashboard</a></li>
+                    }
+                    else if (User.IsInRole("Trainer"))
+                    {
+                        <li><a asp-controller="Trainer" asp-action="Dashboard" class="btn-nav-primary">Dashboard</a></li>
+                    }
+                    else
+                    {
+                        <li><a asp-controller="Member" asp-action="Dashboard" class="btn-nav-primary">Dashboard</a></li>
+                    }
+                    <li>
+                        <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-nav-secondary">Logout</button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li><a asp-controller="Account" asp-action="Login" class="btn-nav-secondary">Login</a></li>
+                    <li><a asp-controller="Account" asp-action="Register" class="btn-nav-primary">Join Now</a></li>
+                }
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="brand-icon"><i class="fas fa-dumbbell"></i></span>
+                <span class="brand-name">PowerFit<span class="accent">Gym</span></span>
+                <p>Transform Your Body. Transform Your Life.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/#about">About Us</a></li>
+                    <li><a href="/#packages">Membership</a></li>
+                    <li><a href="/#trainers">Trainers</a></li>
+                    <li><a href="/#schedules">Schedule</a></li>
+                    <li><a href="/#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contact Us</h4>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Fitness Street, Gulshan-1, Dhaka</p>
+                <p><i class="fas fa-phone"></i> +880 1712-345678</p>
+                <p><i class="fas fa-envelope"></i> info@powerfitgym.com</p>
+                <p><i class="fas fa-clock"></i> Open 6:00 AM – 10:00 PM Daily</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; @DateTime.Now.Year PowerFit Gym. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

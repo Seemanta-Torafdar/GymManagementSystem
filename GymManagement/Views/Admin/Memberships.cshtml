@@ -1,0 +1,43 @@
+@model IEnumerable<BLL.DTOs.MembershipPackageDTO>
+@{
+    ViewData["Title"] = "Membership Packages";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-tags" style="color:var(--accent)"></i> Membership Packages</h1>
+        <p>Manage pricing and gym access plans</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="CreatePackage" class="btn-primary"><i class="fas fa-plus"></i> New Package</a>
+    </div>
+</div>
+
+<div class="grid-3">
+    @foreach (var p in Model)
+    {
+        <div class="package-card">
+            @if(p.Name.Contains("3-Month") || p.Name.Contains("Popular")) { <span class="popular-badge">Popular</span> }
+            <div class="package-name">@p.Name</div>
+            <div class="package-duration">@p.DurationDays days</div>
+            <div class="package-price">
+                <span class="currency">৳</span>
+                <span class="amount">@p.Price.ToString("N0")</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px">@p.Description</div>
+            <ul class="package-benefits">
+                @foreach (var b in p.BenefitList)
+                {
+                    <li><i class="fas fa-check"></i> @b</li>
+                }
+            </ul>
+            <div style="margin-top:auto;display:flex;gap:10px">
+                <a asp-action="EditPackage" asp-route-id="@p.Id" class="btn-outline" style="flex:1;justify-content:center"><i class="fas fa-pencil"></i> Edit</a>
+                <form asp-action="DeletePackage" method="post" style="display:inline">
+                    <input type="hidden" name="id" value="@p.Id" />
+                    <button type="submit" class="btn-danger" style="padding:13px 20px" data-confirm="Delete package @p.Name?"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,71 @@
+@model IEnumerable<BLL.DTOs.PaymentDTO>
+@{
+    ViewData["Title"] = "Payments";
+    Layout = "_AdminLayout";
+    decimal revenue = ViewBag.MonthlyRevenue ?? 0m;
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-money-bill-wave" style="color:var(--accent)"></i> Payments</h1>
+        <p>Member payment records and status management</p>
+    </div>
+    <div class="page-actions">
+        <div class="stat-card" style="padding:14px 20px;margin:0">
+            <div class="revenue-display"><span class="currency">৳</span>@revenue.ToString("N0")</div>
+            <div class="stat-label">This Month's Revenue</div>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title">All Payments (@Model.Count())</span>
+    </div>
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead><tr><th>Member</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Payment Date</th><th>Method</th><th>Actions</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td><strong>@p.MemberName</strong></td>
+                        <td style="font-weight:700;color:#4ade80">৳@p.Amount.ToString("N0")</td>
+                        <td>@p.DueDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            @if (p.Status == "Paid")
+                            { <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> }
+                            else
+                            { <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span> }
+                        </td>
+                        <td>@(p.PaymentDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                        <td>@(p.PaymentMethod ?? "Cash")</td>
+                        <td>
+                            <div class="table-actions">
+                                @if (p.Status == "Pending")
+                                {
+                                    <form asp-action="MarkPaid" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="btn-success btn-sm"><i class="fas fa-check"></i> Mark Paid</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="MarkUnpaid" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="btn-danger btn-sm"><i class="fas fa-times"></i> Mark Unpaid</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fas fa-receipt" style="font-size:2rem;display:block;margin-bottom:12px;color:rgba(230,57,70,0.2)"></i>No payment records found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

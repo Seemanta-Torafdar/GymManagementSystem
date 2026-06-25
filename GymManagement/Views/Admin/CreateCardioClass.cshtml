@@ -1,0 +1,57 @@
+@model BLL.DTOs.CardioScheduleDTO
+@{
+    ViewData["Title"] = "Create Cardio Class";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <a asp-action="Schedules" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Schedules</a>
+        <h1><i class="fas fa-running" style="color:var(--accent)"></i> Add Cardio Class</h1>
+    </div>
+</div>
+
+<div class="form-card" style="max-width:600px">
+    <form asp-action="CreateCardioClass" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="ClassName" class="form-label">Class Name</label>
+                <input asp-for="ClassName" class="form-control" placeholder="e.g. HIIT Cardio Blast" />
+                <span asp-validation-for="ClassName" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DayOfWeek" class="form-label">Day of the Week</label>
+                <select asp-for="DayOfWeek" class="form-control">
+                    <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option><option value="Sunday">Sunday</option><option value="Mon-Wed-Fri">Mon-Wed-Fri</option><option value="Tue-Thu">Tue-Thu</option><option value="Weekends">Weekends</option><option value="Daily">Daily</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Instructor" class="form-label">Instructor Name</label>
+                <input asp-for="Instructor" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="StartTime" class="form-label">Start Time</label>
+                <input asp-for="StartTime" type="time" class="form-control" />
+                <span asp-validation-for="StartTime" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndTime" class="form-label">End Time</label>
+                <input asp-for="EndTime" type="time" class="form-control" />
+                <span asp-validation-for="EndTime" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Capacity" class="form-label">Capacity (Members)</label>
+                <input asp-for="Capacity" type="number" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="EquipmentUsed" class="form-label">Equipment Used</label>
+                <input asp-for="EquipmentUsed" class="form-control" />
+            </div>
+
+        </div>
+        <div style="margin-top:30px;display:flex;gap:12px">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <a asp-action="Schedules" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,200 @@
+@model BLL.DTOs.AdminDashboardDTO
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-chart-pie" style="color:var(--accent)"></i> Admin Dashboard</h1>
+        <p>Welcome back! Here's what's happening at PowerFit Gym.</p>
+    </div>
+    <div class="page-actions">
+        <span style="font-size:0.85rem;color:var(--text-muted)"><i class="fas fa-calendar"></i> @DateTime.Now.ToString("dddd, MMMM dd yyyy")</span>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card-icon blue"><i class="fas fa-users"></i></div>
+        <div class="stat-value count-up" data-target="@Model.TotalMembers">@Model.TotalMembers</div>
+        <div class="stat-label">Total Members</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon purple"><i class="fas fa-user-tie"></i></div>
+        <div class="stat-value count-up" data-target="@Model.TotalTrainers">@Model.TotalTrainers</div>
+        <div class="stat-label">Total Trainers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon green"><i class="fas fa-id-card"></i></div>
+        <div class="stat-value count-up" data-target="@Model.ActiveMemberships">@Model.ActiveMemberships</div>
+        <div class="stat-label">Active Memberships</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon red"><i class="fas fa-calendar-xmark"></i></div>
+        <div class="stat-value count-up" data-target="@Model.ExpiredMemberships">@Model.ExpiredMemberships</div>
+        <div class="stat-label">Expired Memberships</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon yellow"><i class="fas fa-clock"></i></div>
+        <div class="stat-value count-up" data-target="@Model.PendingPayments">@Model.PendingPayments</div>
+        <div class="stat-label">Pending Payments</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon green"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="stat-value">৳@Model.MonthlyRevenue.ToString("N0")</div>
+        <div class="stat-label">Monthly Revenue</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon orange"><i class="fas fa-wallet"></i></div>
+        <div class="stat-value count-up" data-target="@Model.PendingTrainerPayments">@Model.PendingTrainerPayments</div>
+        <div class="stat-label">Pending Trainer Salaries</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon red"><i class="fas fa-box-open"></i></div>
+        <div class="stat-value count-up" data-target="@Model.LowStockEquipment">@Model.LowStockEquipment</div>
+        <div class="stat-label">Low Stock Equipment</div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <span class="chart-card-title"><i class="fas fa-chart-bar" style="color:var(--accent)"></i> Membership Overview</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="membershipChart"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <span class="chart-card-title"><i class="fas fa-chart-pie" style="color:var(--accent)"></i> Payment Status</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="paymentChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Data Row -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+    <!-- Recent Members -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <span class="table-card-title">Recent Members</span>
+            <a asp-action="Members" class="btn-sm-accent">View All</a>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Member</th><th>Joined</th></tr></thead>
+            <tbody>
+                @foreach (var m in Model.RecentMembers)
+                {
+                    <tr>
+                        <td>
+                            <div class="member-name-cell">
+                                <div class="avatar">@m.FirstName.FirstOrDefault()</div>
+                                <div><strong>@m.FullName</strong><span>@m.Email</span></div>
+                            </div>
+                        </td>
+                        <td><span style="color:var(--text-muted);font-size:0.82rem">@m.JoinDate.ToString("MMM dd")</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pending Trainer Salaries -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <span class="table-card-title">Pending Trainer Salaries</span>
+            <a asp-action="TrainerPayments" class="btn-sm-accent">Manage</a>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Trainer</th><th>Month</th><th>Amount</th><th>Action</th></tr></thead>
+            <tbody>
+                @foreach (var tp in Model.PendingTrainerPaymentList)
+                {
+                    <tr>
+                        <td><strong>@tp.TrainerName</strong></td>
+                        <td><span class="badge badge-warning">@tp.MonthName</span></td>
+                        <td>৳@tp.Amount.ToString("N0")</td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="MarkTrainerPaid" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@tp.Id" />
+                                <button type="submit" class="btn-success btn-sm">Pay</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.PendingTrainerPaymentList.Any())
+                {
+                    <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px"><i class="fas fa-check-circle" style="color:#4ade80"></i> All salaries paid</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Membership Chart
+const mCtx = document.getElementById('membershipChart').getContext('2d');
+new Chart(mCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Total Members', 'Active', 'Expired', 'Trainers'],
+        datasets: [{
+            label: 'Count',
+            data: [@Model.TotalMembers, @Model.ActiveMemberships, @Model.ExpiredMemberships, @Model.TotalTrainers],
+            backgroundColor: ['rgba(96,165,250,0.7)', 'rgba(74,222,128,0.7)', 'rgba(248,113,113,0.7)', 'rgba(192,132,252,0.7)'],
+            borderColor: ['#60a5fa','#4ade80','#f87171','#c084fc'],
+            borderWidth: 1, borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9090a8' } },
+            x: { grid: { display: false }, ticks: { color: '#9090a8' } }
+        }
+    }
+});
+// Payment Pie Chart
+const pCtx = document.getElementById('paymentChart').getContext('2d');
+new Chart(pCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pending', 'Paid'],
+        datasets: [{
+            data: [@Model.PendingPayments, Math.max(0, @Model.TotalMembers - @Model.PendingPayments)],
+            backgroundColor: ['rgba(248,113,113,0.8)', 'rgba(74,222,128,0.8)'],
+            borderColor: ['#f87171','#4ade80'], borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { color: '#9090a8', padding: 16 } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+        },
+        cutout: '65%'
+    }
+});
+// Animate stat counters
+document.querySelectorAll('.count-up').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    if (isNaN(target)) return;
+    let c = 0, step = Math.max(1, target / 60);
+    const t = setInterval(() => {
+        c += step;
+        if (c >= target) { el.textContent = target.toLocaleString(); clearInterval(t); }
+        else el.textContent = Math.floor(c).toLocaleString();
+    }, 20);
+});
+</script>
+}

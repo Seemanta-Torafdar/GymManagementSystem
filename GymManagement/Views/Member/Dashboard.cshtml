@@ -1,0 +1,98 @@
+@model BLL.DTOs.MemberDTO
+@{
+    ViewData["Title"] = "My Dashboard";
+    Layout = "_MemberLayout";
+    var notifications = ViewBag.Notifications as IEnumerable<BLL.DTOs.NotificationDTO> ?? Enumerable.Empty<BLL.DTOs.NotificationDTO>();
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Welcome back, @Model.FirstName! 💪</h1>
+        <p>@DateTime.Now.ToString("dddd, MMMM dd yyyy")</p>
+    </div>
+</div>
+
+<!-- Membership Card -->
+@if (Model.ActivePackageName != null)
+{
+    int daysLeft = Model.RemainingDays ?? 0;
+    string daysColor = daysLeft > 14 ? "#4ade80" : daysLeft > 7 ? "#facc15" : "#f87171";
+    <div class="membership-card">
+        <h3 style="font-size:0.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px"><i class="fas fa-id-card"></i> My Membership</h3>
+        <div class="membership-card-grid">
+            <div class="membership-info-item">
+                <div class="membership-info-label">Package</div>
+                <div class="membership-info-value">@Model.ActivePackageName</div>
+            </div>
+            <div class="membership-info-item">
+                <div class="membership-info-label">Started</div>
+                <div class="membership-info-value">@(Model.MembershipStartDate?.ToString("MMM dd, yyyy") ?? "—")</div>
+            </div>
+            <div class="membership-info-item">
+                <div class="membership-info-label">Expires</div>
+                <div class="membership-info-value">@(Model.MembershipEndDate?.ToString("MMM dd, yyyy") ?? "—")</div>
+            </div>
+            <div class="membership-info-item">
+                <div class="membership-info-label">Days Remaining</div>
+                <div class="days-remaining">
+                    <div class="days" style="color:@daysColor">@daysLeft</div>
+                    <div class="days-label">days left</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert-toast alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        You don't have an active membership. <a asp-action="PurchaseMembership" style="color:inherit;text-decoration:underline">Purchase one now</a>.
+    </div>
+}
+
+<!-- Info Cards -->
+<div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card">
+        <div class="stat-card-icon blue"><i class="fas fa-clock"></i></div>
+        <div class="stat-value" style="font-size:1.1rem">@(Model.ShiftName ?? "Not Set")</div>
+        <div class="stat-label">My Gym Shift</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon purple"><i class="fas fa-user-tie"></i></div>
+        <div class="stat-value" style="font-size:1.1rem">@(Model.AssignedTrainerName ?? "Not Assigned")</div>
+        <div class="stat-label">Personal Trainer</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-icon @(Model.PaymentStatus == "Paid" ? "green" : "yellow")">
+            <i class="fas fa-@(Model.PaymentStatus == "Paid" ? "check-circle" : "clock")"></i>
+        </div>
+        <div class="stat-value" style="font-size:1.1rem">@(Model.PaymentStatus ?? "—")</div>
+        <div class="stat-label">Payment Status</div>
+    </div>
+</div>
+
+<!-- Notifications -->
+@if (notifications.Any())
+{
+    <div class="table-card">
+        <div class="table-card-header">
+            <span class="table-card-title"><i class="fas fa-bell" style="color:var(--accent)"></i> Recent Notifications</span>
+            <a asp-action="Notifications" class="btn-sm-accent">View All</a>
+        </div>
+        <div style="padding:16px" class="notification-list">
+            @foreach (var n in notifications.Take(5))
+            {
+                string iconClass = n.Type switch { "Warning" => "warning", "Danger" => "danger", "Success" => "success", _ => "info" };
+                string icon = n.Type switch { "Warning" => "fa-triangle-exclamation", "Danger" => "fa-exclamation-circle", "Success" => "fa-check-circle", _ => "fa-bell" };
+                <div class="notification-item @(n.IsRead ? "" : "unread") @iconClass">
+                    <div class="notif-icon @iconClass"><i class="fas @icon"></i></div>
+                    <div class="notif-body">
+                        <div class="notif-title">@n.Title</div>
+                        <div class="notif-msg">@n.Message</div>
+                        <div class="notif-time">@n.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

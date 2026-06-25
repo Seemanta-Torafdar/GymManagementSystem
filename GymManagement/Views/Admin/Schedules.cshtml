@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Schedules";
+    Layout = "_AdminLayout";
+    var shifts = ViewBag.Shifts as IEnumerable<BLL.DTOs.GymShiftDTO> ?? new List<BLL.DTOs.GymShiftDTO>();
+    var yoga = ViewBag.YogaSchedules as IEnumerable<BLL.DTOs.YogaScheduleDTO> ?? new List<BLL.DTOs.YogaScheduleDTO>();
+    var cardio = ViewBag.CardioSchedules as IEnumerable<BLL.DTOs.CardioScheduleDTO> ?? new List<BLL.DTOs.CardioScheduleDTO>();
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-calendar-alt" style="color:var(--accent)"></i> Class Schedules</h1>
+        <p>Manage gym shifts and group classes</p>
+    </div>
+</div>
+
+<div class="schedule-section card" style="padding:0">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <h3 style="font-size:1.1rem;font-weight:700">Gym Shifts</h3>
+        <a asp-action="CreateGymShift" class="btn-sm-accent"><i class="fas fa-plus"></i> Add Shift</a>
+    </div>
+    <div style="padding:24px">
+        <table class="data-table">
+            <thead><tr><th>Shift</th><th>Time</th><th>Capacity</th><th style="width:100px">Actions</th></tr></thead>
+            <tbody>
+                @foreach(var s in shifts) {
+                    <tr>
+                        <td><strong>@s.ShiftName</strong></td>
+                        <td>@s.TimeRange</td>
+                        <td>@s.Capacity members</td>
+                        <td>
+                            <div style="display:flex;gap:8px">
+                                <a asp-action="EditGymShift" asp-route-id="@s.Id" class="btn-sm btn-secondary"><i class="fas fa-pencil"></i></a>
+                                <form asp-action="DeleteGymShift" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <button type="submit" class="btn-sm btn-danger" data-confirm="Delete shift @s.ShiftName?"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-top:24px">
+    <div class="card" style="padding:0">
+        <div style="padding:20px;border-bottom:1px solid var(--border);background:rgba(230,57,70,0.05);display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--accent)"><i class="fas fa-om"></i> Yoga Classes</h3>
+            <a asp-action="CreateYogaClass" class="btn-sm btn-secondary"><i class="fas fa-plus"></i> Add</a>
+        </div>
+        <div style="padding:20px">
+            <table class="data-table">
+                <thead><tr><th>Class</th><th>Days</th><th>Time</th><th>Instructor</th><th style="width:100px">Actions</th></tr></thead>
+                <tbody>
+                    @foreach(var y in yoga) {
+                        <tr>
+                            <td>@y.ClassName</td>
+                            <td>@y.DayOfWeek</td>
+                            <td>@y.StartTime.ToString(@"hh\:mm")</td>
+                            <td>@y.Instructor</td>
+                            <td>
+                                <div style="display:flex;gap:4px">
+                                    <a asp-action="EditYogaClass" asp-route-id="@y.Id" class="btn-sm btn-secondary" style="padding:4px 8px!important"><i class="fas fa-pencil"></i></a>
+                                    <form asp-action="DeleteYogaClass" method="post" style="display:inline">
+                                        <input type="hidden" name="id" value="@y.Id" />
+                                        <button type="submit" class="btn-sm btn-danger" style="padding:4px 8px!important" data-confirm="Delete yoga class?"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card" style="padding:0">
+        <div style="padding:20px;border-bottom:1px solid var(--border);background:rgba(230,57,70,0.05);display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--accent)"><i class="fas fa-running"></i> Cardio Classes</h3>
+            <a asp-action="CreateCardioClass" class="btn-sm btn-secondary"><i class="fas fa-plus"></i> Add</a>
+        </div>
+        <div style="padding:20px">
+            <table class="data-table">
+                <thead><tr><th>Class</th><th>Days</th><th>Time</th><th>Instructor</th><th style="width:100px">Actions</th></tr></thead>
+                <tbody>
+                    @foreach(var c in cardio) {
+                        <tr>
+                            <td>@c.ClassName</td>
+                            <td>@c.DayOfWeek</td>
+                            <td>@c.StartTime.ToString(@"hh\:mm")</td>
+                            <td>@c.Instructor</td>
+                            <td>
+                                <div style="display:flex;gap:4px">
+                                    <a asp-action="EditCardioClass" asp-route-id="@c.Id" class="btn-sm btn-secondary" style="padding:4px 8px!important"><i class="fas fa-pencil"></i></a>
+                                    <form asp-action="DeleteCardioClass" method="post" style="display:inline">
+                                        <input type="hidden" name="id" value="@c.Id" />
+                                        <button type="submit" class="btn-sm btn-danger" style="padding:4px 8px!important" data-confirm="Delete cardio class?"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

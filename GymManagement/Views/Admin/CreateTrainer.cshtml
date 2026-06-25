@@ -1,0 +1,82 @@
+@model BLL.DTOs.TrainerCreateDTO
+@{
+    ViewData["Title"] = "Add Trainer";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <a asp-action="Trainers" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Trainers</a>
+        <h1><i class="fas fa-user-plus" style="color:var(--accent)"></i> Add New Trainer</h1>
+    </div>
+</div>
+
+<div class="form-card" style="max-width:800px">
+    <form asp-action="CreateTrainer" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert-toast alert-error"></div>
+        
+        <h3 class="form-section-title">Login Credentials</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">Email Address (Login ID)</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="trainer@gym.com" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="form-label">Temporary Password</label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+        </div>
+
+        <h3 class="form-section-title">Personal Information</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="FirstName" class="form-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="form-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="field-error"></span>
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+                <label class="form-label">Profile Photo</label>
+                <input type="file" name="profilePhoto" class="form-control" accept="image/*" />
+            </div>
+        </div>
+
+        <h3 class="form-section-title">Professional Details</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Specialization" class="form-label">Specialization</label>
+                <input asp-for="Specialization" class="form-control" placeholder="e.g. Bodybuilding, Yoga, CrossFit" />
+                <span asp-validation-for="Specialization" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Experience" class="form-label">Years of Experience</label>
+                <input asp-for="Experience" type="number" class="form-control" />
+                <span asp-validation-for="Experience" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MonthlySalary" class="form-label">Monthly Salary (৳)</label>
+                <input asp-for="MonthlySalary" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="MonthlySalary" class="field-error"></span>
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="Certifications" class="form-label">Certifications</label>
+                <input asp-for="Certifications" class="form-control" placeholder="e.g. ACE Certified, ISSA, CPR/AED" />
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="Bio" class="form-label">Bio / Description</label>
+                <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+            </div>
+        </div>
+        
+        <div style="margin-top:30px;display:flex;gap:12px">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Create Trainer</button>
+            <a asp-action="Trainers" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

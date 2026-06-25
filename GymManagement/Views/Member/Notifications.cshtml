@@ -1,0 +1,56 @@
+@model IEnumerable<BLL.DTOs.NotificationDTO>
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "_MemberLayout";
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-bell" style="color:var(--accent)"></i> Notifications</h1>
+        <p>Your recent alerts and messages from the gym.</p>
+    </div>
+</div>
+
+<div class="card" style="padding:0">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <h3 style="font-size:1.1rem;font-weight:700">All Notifications</h3>
+        <span style="font-size:0.85rem;color:var(--text-muted)">@Model.Count() total</span>
+    </div>
+    <div>
+        @if (!Model.Any())
+        {
+            <div style="text-align:center;color:var(--text-muted);padding:60px 40px">
+                <i class="fas fa-bell-slash" style="font-size:3rem;margin-bottom:16px;opacity:0.4;display:block"></i>
+                <p style="font-size:1rem">You have no notifications yet.</p>
+            </div>
+        }
+        else
+        {
+            <div style="display:flex;flex-direction:column">
+                @foreach (var n in Model.OrderByDescending(x => x.CreatedAt))
+                {
+                    <div style="padding:20px 24px;border-bottom:1px solid var(--border);background:@(n.IsRead ? "transparent" : "rgba(245,197,24,0.04)");transition:background 0.2s">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                @if (!n.IsRead)
+                                {
+                                    <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0"></span>
+                                }
+                                <strong style="font-size:0.95rem;color:var(--text-primary)">
+                                    @if (n.Type == "Warning") { <i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:6px"></i> }
+                                    else if (n.Type == "Success") { <i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i> }
+                                    else { <i class="fas fa-info-circle" style="color:#3b82f6;margin-right:6px"></i> }
+                                    @n.Title
+                                </strong>
+                            </div>
+                            <span style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;margin-left:16px">
+                                @n.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                            </span>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.88rem;margin:0;padding-left:@(n.IsRead ? "0" : "18px")">@n.Message</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

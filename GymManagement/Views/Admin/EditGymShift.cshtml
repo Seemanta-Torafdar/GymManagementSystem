@@ -1,0 +1,48 @@
+@model BLL.DTOs.GymShiftDTO
+@{
+    ViewData["Title"] = "Edit Gym Shift";
+    Layout = "_AdminLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <a asp-action="Schedules" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Schedules</a>
+        <h1><i class="fas fa-clock" style="color:var(--accent)"></i> Edit Gym Shift</h1>
+    </div>
+</div>
+
+<div class="form-card" style="max-width:600px">
+    <form asp-action="EditGymShift" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="ShiftName" class="form-label">Shift Name</label>
+                <input asp-for="ShiftName" class="form-control" />
+                <span asp-validation-for="ShiftName" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StartTime" class="form-label">Start Time</label>
+                <input asp-for="StartTime" type="time" class="form-control" />
+                <span asp-validation-for="StartTime" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndTime" class="form-label">End Time</label>
+                <input asp-for="EndTime" type="time" class="form-control" />
+                <span asp-validation-for="EndTime" class="field-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Capacity" class="form-label">Capacity (Members)</label>
+                <input asp-for="Capacity" type="number" class="form-control" />
+            </div>
+
+            <div class="form-group" style="grid-column: span 2">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+        <div style="margin-top:30px;display:flex;gap:12px">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update</button>
+            <a asp-action="Schedules" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

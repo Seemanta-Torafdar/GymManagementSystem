@@ -1,0 +1,93 @@
+@model BLL.DTOs.TrainerDTO
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_TrainerLayout";
+}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-user-circle" style="color:var(--accent)"></i> My Profile</h1>
+        <p>Manage your public information, photo, and account security.</p>
+    </div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:1fr 350px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:24px">
+        <!-- Edit Profile Details -->
+        <div class="card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-pencil"></i> Professional Details</h3>
+            <form asp-action="UpdateProfile" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="MonthlySalary" value="@Model.MonthlySalary" />
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Specialization</label>
+                        <input type="text" name="Specialization" class="form-control" value="@Model.Specialization" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Years of Experience</label>
+                        <input type="number" name="Experience" class="form-control" value="@Model.Experience" required />
+                    </div>
+                    <div class="form-group" style="grid-column: span 2">
+                        <label class="form-label">Certifications</label>
+                        <input type="text" name="Certifications" class="form-control" value="@Model.Certifications" />
+                    </div>
+                    <div class="form-group" style="grid-column: span 2">
+                        <label class="form-label">Bio</label>
+                        <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2; display:flex; align-items:center;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" name="IsAvailable" value="true" @(Model.IsAvailable ? "checked" : "") style="accent-color:var(--accent);width:18px;height:18px" />
+                            <strong>Available for New Members</strong>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top:16px">Save Details</button>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-lock"></i> Change Password</h3>
+            <form asp-action="ChangePassword" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="currentPassword" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="newPassword" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" name="confirmPassword" class="form-control" required />
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top:16px">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <!-- Profile Photo -->
+        <div class="card">
+            <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-image"></i> Profile Photo</h3>
+            <div style="text-align:center;margin-bottom:20px">
+                <div class="avatar avatar-xl" style="margin:0 auto 16px auto;width:150px;height:150px;font-size:3rem">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+                    { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+                    else { @Model.FirstName.FirstOrDefault() }
+                </div>
+            </div>
+            <form asp-action="UploadPhoto" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="form-label">New Photo</label>
+                    <input type="file" name="photo" class="form-control" accept="image/*" required />
+                </div>
+                <button type="submit" class="btn-secondary" style="width:100%">Upload Photo</button>
+            </form>
+        </div>
+    </div>
+</div>
