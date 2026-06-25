@@ -109,16 +109,6 @@ namespace GymManagement.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Profile()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login");
-            var member = await _memberService.GetByUserIdAsync(user.Id);
-            return View(member);
-        }
-
-        [HttpGet]
-        [Authorize]
         public IActionResult ChangePassword() => View();
 
         [HttpPost]
@@ -130,7 +120,7 @@ namespace GymManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login");
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-            if (result.Succeeded) { TempData["Success"] = "Password changed successfully."; return RedirectToAction("Profile"); }
+            if (result.Succeeded) { TempData["Success"] = "Password changed successfully."; return RedirectToRoleDashboard(); }
             foreach (var error in result.Errors) ModelState.AddModelError("", error.Description);
             return View(model);
         }
