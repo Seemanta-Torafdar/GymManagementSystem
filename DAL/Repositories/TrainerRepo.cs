@@ -32,8 +32,16 @@ namespace DAL.Repositories
         public async Task UpdateAsync(Trainer trainer) { _context.Trainers.Update(trainer); await _context.SaveChangesAsync(); }
         public async Task DeleteAsync(int id)
         {
-            var trainer = await _context.Trainers.FindAsync(id);
-            if (trainer != null) { _context.Trainers.Remove(trainer); await _context.SaveChangesAsync(); }
+            // Clear the change tracker so EF doesn't try to in-memory sync the deletions with tracked entities
+            _context.ChangeTracker.Clear();
+
+            // Delete dependent records first to satisfy foreign key constraints
+            await _context.TrainerAssignments.Where(ta => ta.TrainerId == id).ExecuteDeleteAsync();
+            await _context.TrainerReviews.Where(tr => tr.TrainerId == id).ExecuteDeleteAsync();
+            await _context.TrainerPayments.Where(tp => tp.TrainerId == id).ExecuteDeleteAsync();
+            
+            // Delete the trainer itself
+            await _context.Trainers.Where(t => t.Id == id).ExecuteDeleteAsync();
         }
         public async Task<int> GetTotalCountAsync() => await _context.Trainers.CountAsync();
         public async Task<IEnumerable<TrainerAssignment>> GetAssignmentsByTrainerIdAsync(int trainerId) =>

@@ -3,6 +3,7 @@ namespace DAL.EF.Models
     public class Member
     {
         public int Id { get; set; }
+        public string GymId { get; set; } = string.Empty; // Sxxxxx
         public string UserId { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; } = string.Empty;

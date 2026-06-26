@@ -43,7 +43,7 @@ else
                             else { @a.MemberName.FirstOrDefault() }
                         </div>
                         <div>
-                            <h4 style="font-size:1.05rem;font-weight:700;margin-bottom:3px">@a.MemberName</h4>
+                            <h4 style="font-size:1.05rem;font-weight:700;margin-bottom:3px">@a.MemberName <span class="badge badge-accent" style="font-size:0.7rem;margin-left:8px;font-family:monospace">@a.MemberGymId</span></h4>
                             <span style="font-size:0.78rem;color:var(--text-muted)">
                                 <i class="fas fa-calendar-check"></i> Allocated since @a.AssignedDate.ToString("MMM dd, yyyy")
                             </span>

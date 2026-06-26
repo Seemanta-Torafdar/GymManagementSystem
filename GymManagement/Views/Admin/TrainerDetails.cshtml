@@ -7,7 +7,7 @@
 <div class="page-header">
     <div class="page-header-left">
         <a asp-action="Trainers" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;display:inline-block"><i class="fas fa-arrow-left"></i> Back to Trainers</a>
-        <h1>@Model.FullName</h1>
+        <h1>@Model.FullName <span class="badge badge-accent" style="font-size:1rem;margin-left:12px;font-family:monospace;vertical-align:middle">@Model.GymId</span></h1>
         <p>@Model.Specialization</p>
     </div>
 </div>

@@ -26,7 +26,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Member</th><th>Gender</th><th>Phone</th><th>Package</th><th>Shift</th>
+                    <th>Gym ID</th><th>Member</th><th>Gender</th><th>Phone</th><th>Package</th><th>Shift</th>
                     <th>Expiry</th><th>Days Left</th><th>Payment</th><th>Allocated Trainer</th><th>Actions</th>
                 </tr>
             </thead>
@@ -36,6 +36,7 @@
                     int daysLeft = m.RemainingDays ?? 0;
                     string daysBadge = daysLeft > 14 ? "badge-success" : daysLeft > 7 ? "badge-warning" : "badge-danger";
                     <tr>
+                        <td><span class="badge badge-accent" style="font-family:monospace;letter-spacing:1px">@m.GymId</span></td>
                         <td>
                             <div class="member-name-cell">
                                 <div class="avatar">

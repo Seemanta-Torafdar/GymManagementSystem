@@ -3,6 +3,7 @@ namespace DAL.EF.Models
     public class Trainer
     {
         public int Id { get; set; }
+        public string GymId { get; set; } = string.Empty; // Txxxxx
         public string UserId { get; set; } = string.Empty;
         public string Specialization { get; set; } = string.Empty;
         public int Experience { get; set; } // years

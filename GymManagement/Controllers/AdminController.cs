@@ -185,6 +185,32 @@ namespace GymManagement.Controllers
             return View(members);
         }
 
+        public async Task<IActionResult> PTMembers(string? search)
+        {
+            var members = await _memberService.GetAllAsync();
+            members = members.Where(m => m.AssignedTrainerId.HasValue); // Only those with allocated trainers
+            
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                members = members.Where(m =>
+                    m.FullName.ToLower().Contains(search) ||
+                    (m.GymId?.ToLower().Contains(search) ?? false) ||
+                    (m.Email?.ToLower().Contains(search) ?? false));
+            }
+            ViewBag.Search = search;
+            return View(members);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveTrainer(int memberId)
+        {
+            await _trainerService.RemoveTrainerAssignmentAsync(memberId);
+            TempData["Success"] = "Trainer allocation removed.";
+            return RedirectToAction(nameof(PTMembers));
+        }
+
         [HttpGet]
         public async Task<IActionResult> AssignTrainer(int memberId)
         {

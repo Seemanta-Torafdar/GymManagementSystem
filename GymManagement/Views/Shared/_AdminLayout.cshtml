@@ -46,6 +46,9 @@
                 <a asp-controller="Admin" asp-action="TrainerAllocation" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "TrainerAllocation" ? "active" : "")">
                     <i class="fas fa-link"></i><span>Trainer Allocation</span>
                 </a>
+                <a asp-controller="Admin" asp-action="PTMembers" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "PTMembers" ? "active" : "")">
+                    <i class="fas fa-users-cog"></i><span>PT Members</span>
+                </a>
             </div>
             <div class="nav-group">
                 <span class="nav-label">Finance</span>

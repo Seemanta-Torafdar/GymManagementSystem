@@ -74,6 +74,11 @@ namespace BLL.Services
                 Certifications = dto.Certifications
             };
             await _trainerRepo.AddAsync(trainer);
+            
+            // Generate unique GymId using the newly created Id
+            trainer.GymId = "T" + (100000 + trainer.Id).ToString();
+            await _trainerRepo.UpdateAsync(trainer);
+            
             return true;
         }
 
@@ -137,6 +142,26 @@ namespace BLL.Services
             return true;
         }
 
+        public async Task<bool> RemoveTrainerAssignmentAsync(int memberId)
+        {
+            var trainers = await _trainerRepo.GetAllAsync();
+            var assignmentsUpdated = false;
+            foreach (var trainer in trainers)
+            {
+                var assignments = trainer.TrainerAssignments?.Where(a => a.MemberId == memberId && a.IsActive).ToList();
+                if (assignments != null && assignments.Any())
+                {
+                    foreach (var assignment in assignments)
+                    {
+                        assignment.IsActive = false;
+                    }
+                    await _trainerRepo.UpdateAsync(trainer);
+                    assignmentsUpdated = true;
+                }
+            }
+            return assignmentsUpdated;
+        }
+
         public async Task<bool> UpdateWorkoutPlanAsync(int assignmentId, string workoutPlan, string notes)
         {
             // Handled via direct repo update
@@ -146,6 +171,7 @@ namespace BLL.Services
         private TrainerDTO MapToDTO(Trainer t, double avgRating) => new()
         {
             Id = t.Id,
+            GymId = t.GymId,
             UserId = t.UserId,
             FirstName = t.User?.FirstName ?? "",
             LastName = t.User?.LastName ?? "",
@@ -166,6 +192,7 @@ namespace BLL.Services
             {
                 Id = ta.Id,
                 MemberId = ta.MemberId,
+                MemberGymId = ta.Member?.GymId ?? "",
                 MemberName = (ta.Member?.User?.FirstName + " " + ta.Member?.User?.LastName).Trim(),
                 MemberPhoto = ta.Member?.User?.ProfilePhoto,
                 WorkoutPlan = ta.WorkoutPlan,

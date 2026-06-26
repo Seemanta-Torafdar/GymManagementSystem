@@ -5,6 +5,7 @@ namespace BLL.DTOs
     public class TrainerDTO
     {
         public int Id { get; set; }
+        public string GymId { get; set; } = string.Empty;
         public string UserId { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -73,6 +74,7 @@ namespace BLL.DTOs
     {
         public int Id { get; set; }
         public int MemberId { get; set; }
+        public string MemberGymId { get; set; } = string.Empty;
         public string MemberName { get; set; } = string.Empty;
         public string? MemberPhoto { get; set; }
         public string? WorkoutPlan { get; set; }

@@ -24,6 +24,7 @@ namespace BLL.Interfaces
         Task<bool> DeleteAsync(int id);
         Task<bool> UpdateProfilePhotoAsync(string userId, string photoPath);
         Task<bool> AssignMemberAsync(int trainerId, int memberId, string? workoutPlan, string? notes);
+        Task<bool> RemoveTrainerAssignmentAsync(int memberId);
         Task<bool> UpdateWorkoutPlanAsync(int assignmentId, string workoutPlan, string notes);
     }
 

@@ -1,0 +1,85 @@
+@model IEnumerable<BLL.DTOs.MemberDTO>
+@{
+    ViewData["Title"] = "Personal Training Members";
+    Layout = "_AdminLayout";
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-users" style="color:var(--accent)"></i> Personal Training Members</h1>
+        <p>List of all gym members who have an active personal trainer allocation.</p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title">Members with Personal Trainers</span>
+        <form method="get" class="search-box">
+            <i class="fas fa-search"></i>
+            <input name="search" type="text" placeholder="Search by name, ID, email..." value="@ViewBag.Search" />
+            <button type="submit" style="background:none;border:none;color:var(--accent);cursor:pointer"><i class="fas fa-arrow-right"></i></button>
+        </form>
+    </div>
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Gym ID</th>
+                    <th>Member</th>
+                    <th>Allocated Trainer</th>
+                    <th>Trainer Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="badge badge-accent" style="font-family:monospace;letter-spacing:1px">@m.GymId</span>
+                        </td>
+                        <td>
+                            <div class="member-name-cell">
+                                <div class="avatar">
+                                    @if (!string.IsNullOrEmpty(m.ProfilePhoto))
+                                    { <img src="@m.ProfilePhoto" alt="@m.FirstName" /> }
+                                    else { @m.FirstName.FirstOrDefault() }
+                                </div>
+                                <div>
+                                    <strong>@m.FullName</strong>
+                                    <span>@m.Email</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div class="avatar" style="width:32px;height:32px;font-size:0.85rem">@m.AssignedTrainerName?.FirstOrDefault()</div>
+                                <strong>@m.AssignedTrainerName</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a asp-action="AssignTrainer" asp-route-memberId="@m.Id" class="btn-sm btn-secondary" title="Change Trainer">
+                                    <i class="fas fa-edit"></i> Change
+                                </a>
+                                <form asp-action="RemoveTrainer" method="post" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="memberId" value="@m.Id" />
+                                    <button type="submit" class="btn-danger btn-sm" data-confirm="Remove trainer allocation for @m.FullName?">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-muted)">
+                        <i class="fas fa-user-slash" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.3"></i>
+                        No members found with a personal trainer.
+                    </td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -68,6 +68,10 @@ namespace BLL.Services
             };
             await _memberRepo.AddAsync(member);
 
+            // Generate unique GymId using the newly created Id
+            member.GymId = "S" + (100000 + member.Id).ToString();
+            await _memberRepo.UpdateAsync(member);
+
             // Create membership purchase
             var package = await _membershipRepo.GetPackageByIdAsync(dto.PackageId);
             if (package != null)
@@ -156,6 +160,7 @@ namespace BLL.Services
             return new MemberDTO
             {
                 Id = m.Id,
+                GymId = m.GymId,
                 UserId = m.UserId,
                 FirstName = m.User?.FirstName ?? "",
                 LastName = m.User?.LastName ?? "",
