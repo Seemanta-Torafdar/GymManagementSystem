@@ -3,58 +3,76 @@
     ViewData["Title"] = "My Students";
     Layout = "_TrainerLayout";
 }
+
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-users" style="color:var(--accent)"></i> My Students</h1>
-        <p>Manage workout plans and track progress for your assigned members.</p>
+        <h1><i class="fas fa-users" style="color:var(--accent)"></i> Allocated Students</h1>
+        <p>Members currently allocated to you as your personal training students.</p>
+    </div>
+    <div class="page-actions">
+        <span style="padding:8px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-muted)">
+            <i class="fas fa-users"></i> @Model.Assignments.Count student@(Model.Assignments.Count != 1 ? "s" : "") allocated
+        </span>
     </div>
 </div>
 
-<div class="card" style="padding:0">
-    <div style="padding:20px;border-bottom:1px solid var(--border)">
-        <h3 style="font-size:1.1rem;font-weight:700">Assigned Members (@Model.Assignments.Count)</h3>
+@if (!Model.Assignments.Any())
+{
+    <div class="card" style="padding:60px;text-align:center;max-width:500px;margin:0 auto">
+        <div style="width:80px;height:80px;background:rgba(200,135,42,0.1);border:2px dashed rgba(200,135,42,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+            <i class="fas fa-user-slash" style="font-size:2rem;color:rgba(200,135,42,0.5)"></i>
+        </div>
+        <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:12px">No Students Allocated Yet</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+            The gym admin has not yet allocated any students to you. Once allocated, their details and training plans will appear here.
+        </p>
     </div>
-    <div style="padding:24px">
-        @if (!Model.Assignments.Any())
+}
+else
+{
+    <div class="grid-2">
+        @foreach (var a in Model.Assignments)
         {
-            <div style="text-align:center;color:var(--text-muted);padding:40px">
-                <i class="fas fa-user-slash" style="font-size:3rem;margin-bottom:16px;opacity:0.5"></i>
-                <p>You have no assigned members currently.</p>
-            </div>
-        }
-        else
-        {
-            <div class="grid-2">
-                @foreach (var a in Model.Assignments)
-                {
-                    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:16px">
-                        <div style="display:flex;align-items:center;gap:16px">
-                            <div class="avatar avatar-lg">
-                                @if (!string.IsNullOrEmpty(a.MemberPhoto))
-                                { <img src="@a.MemberPhoto" alt="@a.MemberName" /> }
-                                else { @a.MemberName.FirstOrDefault() }
-                            </div>
-                            <div>
-                                <h4 style="font-size:1.1rem;font-weight:700">@a.MemberName</h4>
-                                <span style="font-size:0.8rem;color:var(--text-muted)">Assigned: @a.AssignedDate.ToString("MMM dd, yyyy")</span>
-                            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+                <!-- Header -->
+                <div style="padding:20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+                    <div style="display:flex;align-items:center;gap:14px">
+                        <div class="avatar avatar-lg">
+                            @if (!string.IsNullOrEmpty(a.MemberPhoto))
+                            { <img src="@a.MemberPhoto" alt="@a.MemberName" /> }
+                            else { @a.MemberName.FirstOrDefault() }
                         </div>
-                        <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:12px">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="assignmentId" value="@a.Id" />
-                            <div class="form-group" style="margin:0">
-                                <label class="form-label">Workout Plan URL / Link</label>
-                                <input type="url" name="workoutPlan" class="form-control" value="@a.WorkoutPlan" placeholder="https://docs.google.com/..." />
-                            </div>
-                            <div class="form-group" style="margin:0">
-                                <label class="form-label">Training Notes & Goals</label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="Member's current goals and progress...">@a.TrainingNotes</textarea>
-                            </div>
-                            <button type="submit" class="btn-primary btn-sm" style="align-self:flex-end">Save Plan</button>
-                        </form>
+                        <div>
+                            <h4 style="font-size:1.05rem;font-weight:700;margin-bottom:3px">@a.MemberName</h4>
+                            <span style="font-size:0.78rem;color:var(--text-muted)">
+                                <i class="fas fa-calendar-check"></i> Allocated since @a.AssignedDate.ToString("MMM dd, yyyy")
+                            </span>
+                        </div>
                     </div>
-                }
+                    <a asp-action="StudentDetails" asp-route-id="@a.MemberId" class="btn-sm-accent">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+
+                <!-- Workout Plan Section -->
+                <div style="padding:20px">
+                    <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:14px">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="assignmentId" value="@a.Id" />
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label"><i class="fas fa-link"></i> Workout Plan URL</label>
+                            <input type="url" name="workoutPlan" class="form-control" value="@a.WorkoutPlan" placeholder="https://docs.google.com/..." />
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label"><i class="fas fa-sticky-note"></i> Training Notes</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Goals, progress, instructions...">@a.TrainingNotes</textarea>
+                        </div>
+                        <button type="submit" class="btn-primary btn-sm" style="align-self:flex-end">
+                            <i class="fas fa-save"></i> Save Plan
+                        </button>
+                    </form>
+                </div>
             </div>
         }
     </div>
-</div>
+}

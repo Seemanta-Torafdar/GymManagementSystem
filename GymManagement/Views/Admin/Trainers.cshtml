@@ -39,7 +39,10 @@
                         { <i class="fas fa-star star @(s <= t.AverageRating ? "" : "empty")"></i> }
                         <span class="rating-text">@t.AverageRating (@t.TotalReviews)</span>
                     </div>
-                    <span style="font-size:0.9rem;font-weight:700;color:#4ade80">৳@t.MonthlySalary.ToString("N0")</span>
+                    <div style="text-align:right">
+                        <div style="font-size:0.9rem;font-weight:700;color:#4ade80">Salary: ৳@t.MonthlySalary.ToString("N0")</div>
+                        <div style="font-size:0.9rem;font-weight:700;color:var(--accent)">Charge: ৳@t.TrainingCharge.ToString("N0")</div>
+                    </div>
                 </div>
                 <div class="table-actions">
                     <a asp-action="TrainerDetails" asp-route-id="@t.Id" class="btn-sm-accent"><i class="fas fa-eye"></i> View</a>

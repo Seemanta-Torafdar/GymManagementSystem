@@ -90,7 +90,18 @@ namespace BLL.Services
             // Assign trainer if selected
             if (dto.TrainerId.HasValue)
             {
-                var updatedMember = await _memberRepo.GetByIdAsync(member.Id);
+                var trainer = await _trainerRepo.GetByIdAsync(dto.TrainerId.Value);
+                if (trainer != null)
+                {
+                    trainer.TrainerAssignments.Add(new TrainerAssignment
+                    {
+                        TrainerId = dto.TrainerId.Value,
+                        MemberId = member.Id,
+                        AssignedDate = DateTime.Now,
+                        IsActive = true
+                    });
+                    await _trainerRepo.UpdateAsync(trainer);
+                }
             }
             return (true, Enumerable.Empty<string>());
         }
@@ -170,6 +181,7 @@ namespace BLL.Services
                 YogaTimeRange = activePurchase?.YogaSchedule != null ? $"{activePurchase.YogaSchedule.DayOfWeek} {activePurchase.YogaSchedule.StartTime:hh\\:mm} - {activePurchase.YogaSchedule.EndTime:hh\\:mm}" : null,
                 CardioClassName = activePurchase?.CardioSchedule?.ClassName,
                 CardioTimeRange = activePurchase?.CardioSchedule != null ? $"{activePurchase.CardioSchedule.DayOfWeek} {activePurchase.CardioSchedule.StartTime:hh\\:mm} - {activePurchase.CardioSchedule.EndTime:hh\\:mm}" : null,
+                AssignedTrainerId = activeAssignment?.TrainerId,
                 AssignedTrainerName = activeAssignment?.Trainer?.User != null ? $"{activeAssignment.Trainer.User.FirstName} {activeAssignment.Trainer.User.LastName}" : null
             };
         }

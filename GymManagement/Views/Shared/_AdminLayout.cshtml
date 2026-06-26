@@ -43,6 +43,9 @@
                 <a asp-controller="Admin" asp-action="Equipment" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Equipment") == true ? "active" : "")">
                     <i class="fas fa-dumbbell"></i><span>Equipment</span>
                 </a>
+                <a asp-controller="Admin" asp-action="TrainerAllocation" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "TrainerAllocation" ? "active" : "")">
+                    <i class="fas fa-link"></i><span>Trainer Allocation</span>
+                </a>
             </div>
             <div class="nav-group">
                 <span class="nav-label">Finance</span>

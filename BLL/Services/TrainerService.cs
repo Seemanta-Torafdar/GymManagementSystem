@@ -69,6 +69,7 @@ namespace BLL.Services
                 Specialization = dto.Specialization,
                 Experience = dto.Experience,
                 MonthlySalary = dto.MonthlySalary,
+                TrainingCharge = dto.TrainingCharge,
                 Bio = dto.Bio,
                 Certifications = dto.Certifications
             };
@@ -83,6 +84,7 @@ namespace BLL.Services
             trainer.Specialization = dto.Specialization;
             trainer.Experience = dto.Experience;
             trainer.MonthlySalary = dto.MonthlySalary;
+            trainer.TrainingCharge = dto.TrainingCharge;
             trainer.Bio = dto.Bio;
             trainer.Certifications = dto.Certifications;
             trainer.IsAvailable = dto.IsAvailable;
@@ -151,6 +153,7 @@ namespace BLL.Services
             Specialization = t.Specialization,
             Experience = t.Experience,
             MonthlySalary = t.MonthlySalary,
+            TrainingCharge = t.TrainingCharge,
             Bio = t.Bio,
             Certifications = t.Certifications,
             ProfilePhoto = t.User?.ProfilePhoto,

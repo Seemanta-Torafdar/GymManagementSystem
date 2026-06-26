@@ -116,14 +116,17 @@
         <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-user-tie"></i> Assigned Trainer</h3>
         @if (!string.IsNullOrEmpty(Model.AssignedTrainerName))
         {
-            <div style="display:flex;align-items:center;gap:16px">
-                <div class="avatar avatar-lg" style="flex-shrink:0">
-                    @Model.AssignedTrainerName.FirstOrDefault()
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:16px">
+                    <div class="avatar avatar-lg" style="flex-shrink:0">
+                        @Model.AssignedTrainerName.FirstOrDefault()
+                    </div>
+                    <div>
+                        <div style="font-weight:800;font-size:1.05rem;margin-bottom:4px">@Model.AssignedTrainerName</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary)">Your personal trainer</div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-weight:800;font-size:1.05rem;margin-bottom:4px">@Model.AssignedTrainerName</div>
-                    <div style="font-size:0.85rem;color:var(--text-secondary)">Your personal trainer</div>
-                </div>
+                <a asp-action="TrainerProfile" asp-route-id="@Model.AssignedTrainerId" class="btn-sm-accent"><i class="fas fa-eye"></i> Profile</a>
             </div>
         }
         else

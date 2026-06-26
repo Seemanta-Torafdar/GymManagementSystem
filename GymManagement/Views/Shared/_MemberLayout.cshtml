@@ -28,6 +28,9 @@
                 <a asp-controller="Member" asp-action="Schedule" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Schedule" ? "active" : "")">
                     <i class="fas fa-calendar-check"></i><span>My Schedule</span>
                 </a>
+                <a asp-controller="Member" asp-action="MyTrainer" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MyTrainer" || ViewContext.RouteData.Values["action"]?.ToString() == "TrainerProfile" ? "active" : "")">
+                    <i class="fas fa-user-tie"></i><span>My Trainer</span>
+                </a>
                 <a asp-controller="Member" asp-action="Notifications" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Notifications" ? "active" : "")">
                     <i class="fas fa-bell"></i><span>Notifications</span>
                     @if (ViewBag.UnreadCount != null && (int)ViewBag.UnreadCount > 0)

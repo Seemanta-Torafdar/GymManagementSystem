@@ -117,6 +117,15 @@ namespace GymManagement.Controllers
             return View(notifications);
         }
 
+        public async Task<IActionResult> MyTrainer()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+            var member = await _memberService.GetByUserIdAsync(user.Id);
+            if (member == null) return RedirectToAction(nameof(Dashboard));
+            return View(member);
+        }
+
         public async Task<IActionResult> TrainerProfile(int id)
         {
             var trainer = await _trainerService.GetByIdAsync(id);

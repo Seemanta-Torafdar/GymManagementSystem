@@ -32,12 +32,13 @@ namespace BLL.Services
             await _repo.UpdateAsync(p); return true;
         }
 
-        public async Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId)
+        public async Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId, string? notes = null)
         {
             await _repo.AddAsync(new Payment
             {
                 MemberId = memberId, Amount = amount, DueDate = dueDate,
-                MembershipPurchaseId = purchaseId, Status = "Pending", PaymentMethod = "Cash"
+                MembershipPurchaseId = purchaseId, Status = "Pending", PaymentMethod = "Cash",
+                Notes = notes
             });
             return true;
         }

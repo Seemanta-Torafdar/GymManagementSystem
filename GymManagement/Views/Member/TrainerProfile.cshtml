@@ -1,1 +1,127 @@
-﻿@{ /* placeholder */ }
+@model BLL.DTOs.TrainerDTO
+@{
+    ViewData["Title"] = "Trainer Profile";
+    Layout = "_MemberLayout";
+    var reviews = ViewBag.Reviews as IEnumerable<BLL.DTOs.ReviewDTO>;
+    bool hasReviewed = ViewBag.HasReviewed != null && (bool)ViewBag.HasReviewed;
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-user-tie" style="color:var(--accent)"></i> Trainer Profile</h1>
+        <p>Learn more about your trainer</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Schedule" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back to Schedule</a>
+    </div>
+</div>
+
+<div class="profile-header">
+    <div class="profile-photo-section">
+        <div class="avatar avatar-xl">
+            @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+            { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+            else { @Model.FirstName.FirstOrDefault() }
+        </div>
+        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">
+            @Model.Experience yrs exp
+        </div>
+    </div>
+    <div style="flex:1">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:4px">@Model.FullName</h2>
+        <p style="color:var(--accent);margin-bottom:20px;font-weight:600">@Model.Specialization</p>
+        
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);padding:16px;border-radius:var(--radius);margin-bottom:20px;line-height:1.6;color:var(--text)">
+            @(Model.Bio ?? "No biography provided yet.")
+        </div>
+
+        <div class="profile-info-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="profile-info-item"><div class="info-label">Certifications</div><div class="info-value">@(Model.Certifications ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Active Students</div><div class="info-value">@Model.AssignedMembersCount</div></div>
+            <div class="profile-info-item">
+                <div class="info-label">Rating</div>
+                <div class="info-value" style="color:var(--gold)">
+                    @if (Model.AverageRating > 0)
+                    {
+                        for (int i = 0; i < Math.Round((double)Model.AverageRating); i++) { <i class="fas fa-star"></i> }
+                        <span style="color:var(--text-muted);font-size:0.85rem;margin-left:4px">(@Model.TotalReviews reviews)</span>
+                    }
+                    else
+                    {
+                        <span style="color:var(--text-muted)">No ratings yet</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Submit Review Section -->
+    <div class="card" style="padding:24px">
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px"><i class="fas fa-star" style="color:var(--gold)"></i> Rate Your Trainer</h3>
+        @if (hasReviewed)
+        {
+            <div style="padding:20px;text-align:center;color:var(--text-muted);background:var(--bg-secondary);border-radius:var(--radius)">
+                <i class="fas fa-check-circle" style="font-size:2rem;color:var(--success);margin-bottom:12px"></i>
+                <p>You have already submitted a review for this trainer. Thank you for your feedback!</p>
+            </div>
+        }
+        else
+        {
+            <form asp-action="RateTrainer" method="post" style="display:flex;flex-direction:column;gap:16px">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="trainerId" value="@Model.Id" />
+                
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Rating</label>
+                    <div class="star-rating-widget" style="font-size:1.5rem;color:var(--text-muted);display:flex;gap:4px;flex-direction:row-reverse;justify-content:flex-end">
+                        <input type="radio" name="rating" value="5" id="r5" class="d-none" required /><label for="r5" style="cursor:pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" name="rating" value="4" id="r4" class="d-none" /><label for="r4" style="cursor:pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" name="rating" value="3" id="r3" class="d-none" /><label for="r3" style="cursor:pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" name="rating" value="2" id="r2" class="d-none" /><label for="r2" style="cursor:pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" name="rating" value="1" id="r1" class="d-none" /><label for="r1" style="cursor:pointer"><i class="fas fa-star"></i></label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Comment (Optional)</label>
+                    <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit Review</button>
+            </form>
+        }
+    </div>
+
+    <!-- Recent Reviews -->
+    <div class="card" style="padding:0">
+        <div style="padding:20px;border-bottom:1px solid var(--border)">
+            <h3 style="font-size:1.1rem;font-weight:700">Recent Reviews</h3>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+            @if(reviews != null && reviews.Any())
+            {
+                foreach(var review in reviews.Take(5))
+                {
+                    <div style="padding-bottom:16px;border-bottom:1px solid var(--border)">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                            <strong>@review.MemberName</strong>
+                            <span style="color:var(--text-muted);font-size:0.8rem">@review.ReviewDate.ToString("MMM dd")</span>
+                        </div>
+                        <div style="color:var(--gold);margin-bottom:8px;font-size:0.85rem">
+                            @for(int i=0; i<review.Rating; i++) { <i class="fas fa-star"></i> }
+                        </div>
+                        @if(!string.IsNullOrEmpty(review.Comment))
+                        {
+                            <p style="font-size:0.9rem;color:var(--text-secondary);margin:0">"@review.Comment"</p>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color:var(--text-muted);text-align:center;padding:20px">No reviews yet.</p>
+            }
+        </div>
+    </div>
+</div>

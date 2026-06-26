@@ -1,0 +1,75 @@
+@model BLL.DTOs.MemberDTO
+@{
+    ViewData["Title"] = "Student Details";
+    Layout = "_TrainerLayout";
+    var assignment = ViewBag.Assignment as BLL.DTOs.TrainerAssignmentDTO;
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-user" style="color:var(--accent)"></i> Student Details</h1>
+        <p>In-depth profile for @Model.FullName</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Students" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back to Students</a>
+    </div>
+</div>
+
+<div class="profile-header">
+    <div class="profile-photo-section">
+        <div class="avatar avatar-xl">
+            @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+            { <img src="@Model.ProfilePhoto" alt="@Model.FullName" /> }
+            else { @Model.FirstName.FirstOrDefault() }
+        </div>
+        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">@Model.Gender • @(DateTime.Today.Year - Model.DateOfBirth.Year) yrs</div>
+    </div>
+    <div style="flex:1">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:4px">@Model.FullName</h2>
+        <p style="color:var(--text-muted);margin-bottom:20px">@Model.Email • @Model.Phone</p>
+        
+        <div class="profile-info-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="profile-info-item"><div class="info-label">Blood Group</div><div class="info-value">@(Model.BloodGroup ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Emergency Contact</div><div class="info-value">@(Model.EmergencyContact ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Emergency Phone</div><div class="info-value">@(Model.EmergencyPhone ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Package</div><div class="info-value">@(Model.ActivePackageName ?? "None")</div></div>
+            <div class="profile-info-item"><div class="info-label">Gym Shift</div><div class="info-value">@(Model.ShiftName ?? "—")</div></div>
+            <div class="profile-info-item"><div class="info-label">Remaining Days</div><div class="info-value">@(Model.RemainingDays?.ToString() ?? "0")</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Medical Notes -->
+    <div class="card" style="padding:24px">
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--danger)"><i class="fas fa-heartbeat"></i> Medical Notes</h3>
+        @if (!string.IsNullOrEmpty(Model.MedicalNotes))
+        {
+            <div style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);padding:16px;border-radius:var(--radius);color:var(--text);font-size:0.95rem;line-height:1.6">
+                @Model.MedicalNotes
+            </div>
+        }
+        else
+        {
+            <p style="color:var(--text-muted);font-style:italic">No medical conditions or notes provided.</p>
+        }
+    </div>
+
+    <!-- Active Workout Plan -->
+    <div class="card" style="padding:24px">
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-clipboard-list"></i> Current Workout Plan</h3>
+        <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:16px">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="assignmentId" value="@assignment?.Id" />
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Plan URL</label>
+                <input type="url" name="workoutPlan" class="form-control" value="@assignment?.WorkoutPlan" placeholder="https://..." />
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Trainer Notes</label>
+                <textarea name="notes" class="form-control" rows="4">@assignment?.TrainingNotes</textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="align-self:flex-start">Update Plan</button>
+        </form>
+    </div>
+</div>

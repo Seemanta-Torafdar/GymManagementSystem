@@ -13,6 +13,8 @@ namespace DAL.Repositories
         public async Task<IEnumerable<Member>> GetAllAsync() =>
             await _context.Members.Include(m => m.User)
                 .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Package)
+                .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Shift)
+                .Include(m => m.TrainerAssignments).ThenInclude(ta => ta.Trainer).ThenInclude(t => t.User)
                 .ToListAsync();
 
         public async Task<Member?> GetByIdAsync(int id) =>
@@ -43,6 +45,9 @@ namespace DAL.Repositories
         public async Task<int> GetTotalCountAsync() => await _context.Members.CountAsync();
         public async Task<IEnumerable<Member>> SearchAsync(string query) =>
             await _context.Members.Include(m => m.User)
+                .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Package)
+                .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Shift)
+                .Include(m => m.TrainerAssignments).ThenInclude(ta => ta.Trainer).ThenInclude(t => t.User)
                 .Where(m => m.User.FirstName.Contains(query) || m.User.LastName.Contains(query) || m.User.Email!.Contains(query) || m.Phone.Contains(query))
                 .ToListAsync();
     }

@@ -62,7 +62,7 @@ namespace BLL.Interfaces
         Task<IEnumerable<PaymentDTO>> GetByMemberIdAsync(int memberId);
         Task<bool> MarkAsPaidAsync(int paymentId);
         Task<bool> MarkAsUnpaidAsync(int paymentId);
-        Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId);
+        Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId, string? notes = null);
         Task<decimal> GetMonthlyRevenueAsync(int month, int year);
 
         Task<IEnumerable<TrainerPaymentDTO>> GetAllTrainerPaymentsAsync();

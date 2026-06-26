@@ -7,6 +7,7 @@ namespace DAL.EF.Models
         public string Specialization { get; set; } = string.Empty;
         public int Experience { get; set; } // years
         public decimal MonthlySalary { get; set; }
+        public decimal TrainingCharge { get; set; } // Fee charged to member for personal training
         public string? Bio { get; set; }
         public string? Certifications { get; set; }
         public bool IsAvailable { get; set; } = true;

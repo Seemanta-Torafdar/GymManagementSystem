@@ -13,6 +13,7 @@ namespace BLL.DTOs
         public string Specialization { get; set; } = string.Empty;
         public int Experience { get; set; }
         public decimal MonthlySalary { get; set; }
+        public decimal TrainingCharge { get; set; }
         public string? Bio { get; set; }
         public string? Certifications { get; set; }
         public string? ProfilePhoto { get; set; }
@@ -47,6 +48,9 @@ namespace BLL.DTOs
         [Range(0, 9999999, ErrorMessage = "Please enter a valid salary.")]
         public decimal MonthlySalary { get; set; }
 
+        [Range(0, 9999999, ErrorMessage = "Please enter a valid training charge.")]
+        public decimal TrainingCharge { get; set; }
+
         public string? Bio { get; set; }
         public string? Certifications { get; set; }
         public string? ProfilePhoto { get; set; }
@@ -58,6 +62,7 @@ namespace BLL.DTOs
         public string Specialization { get; set; } = string.Empty;
         public int Experience { get; set; }
         public decimal MonthlySalary { get; set; }
+        public decimal TrainingCharge { get; set; }
         public string? Bio { get; set; }
         public string? Certifications { get; set; }
         public bool IsAvailable { get; set; }

@@ -91,6 +91,8 @@ namespace DAL.EF
                 .Property(p => p.Price).HasPrecision(18, 2);
             builder.Entity<Trainer>()
                 .Property(t => t.MonthlySalary).HasPrecision(18, 2);
+            builder.Entity<Trainer>()
+                .Property(t => t.TrainingCharge).HasPrecision(18, 2);
             builder.Entity<Payment>()
                 .Property(p => p.Amount).HasPrecision(18, 2);
             builder.Entity<TrainerPayment>()
@@ -196,9 +198,9 @@ namespace DAL.EF
 
             // Trainer entities
             builder.Entity<Trainer>().HasData(
-                new Trainer { Id = 1, UserId = "user-trainer-001", Specialization = "Strength & Conditioning", Experience = 8, MonthlySalary = 45000, Bio = "Expert in powerlifting and muscle building with 8 years of coaching experience.", Certifications = "NSCA-CSCS, ACE-CPT", IsAvailable = true, JoinDate = new DateTime(2024, 1, 15) },
-                new Trainer { Id = 2, UserId = "user-trainer-002", Specialization = "Yoga & Flexibility", Experience = 6, MonthlySalary = 38000, Bio = "Certified yoga instructor specializing in Hatha and Vinyasa yoga.", Certifications = "RYT-500, ACE-GFI", IsAvailable = true, JoinDate = new DateTime(2024, 1, 20) },
-                new Trainer { Id = 3, UserId = "user-trainer-003", Specialization = "Cardio & Weight Loss", Experience = 5, MonthlySalary = 35000, Bio = "Specialist in HIIT training and nutrition coaching for weight management.", Certifications = "ACSM-CPT, Precision Nutrition L1", IsAvailable = true, JoinDate = new DateTime(2024, 2, 1) }
+                new Trainer { Id = 1, UserId = "user-trainer-001", Specialization = "Strength & Conditioning", Experience = 8, MonthlySalary = 45000, TrainingCharge = 3000, Bio = "Expert in powerlifting and muscle building with 8 years of coaching experience.", Certifications = "NSCA-CSCS, ACE-CPT", IsAvailable = true, JoinDate = new DateTime(2024, 1, 15) },
+                new Trainer { Id = 2, UserId = "user-trainer-002", Specialization = "Yoga & Flexibility", Experience = 6, MonthlySalary = 38000, TrainingCharge = 2500, Bio = "Certified yoga instructor specializing in Hatha and Vinyasa yoga.", Certifications = "RYT-500, ACE-GFI", IsAvailable = true, JoinDate = new DateTime(2024, 1, 20) },
+                new Trainer { Id = 3, UserId = "user-trainer-003", Specialization = "Cardio & Weight Loss", Experience = 5, MonthlySalary = 35000, TrainingCharge = 2000, Bio = "Specialist in HIIT training and nutrition coaching for weight management.", Certifications = "ACSM-CPT, Precision Nutrition L1", IsAvailable = true, JoinDate = new DateTime(2024, 2, 1) }
             );
 
             // Sample Member Users

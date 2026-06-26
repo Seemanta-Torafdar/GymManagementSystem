@@ -31,6 +31,7 @@ namespace BLL.DTOs
         public string? YogaTimeRange { get; set; }
         public string? CardioClassName { get; set; }
         public string? CardioTimeRange { get; set; }
+        public int? AssignedTrainerId { get; set; }
         public string? AssignedTrainerName { get; set; }
     }
 

@@ -169,6 +169,22 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Trainers));
         }
 
+        public async Task<IActionResult> TrainerAllocation(string? search)
+        {
+            var members = await _memberService.GetAllAsync();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                members = members.Where(m =>
+                    m.FullName.ToLower().Contains(search) ||
+                    (m.Email?.ToLower().Contains(search) ?? false));
+            }
+            var trainers = await _trainerService.GetAllAsync();
+            ViewBag.Trainers = trainers;
+            ViewBag.Search = search;
+            return View(members);
+        }
+
         [HttpGet]
         public async Task<IActionResult> AssignTrainer(int memberId)
         {
@@ -183,6 +199,15 @@ namespace GymManagement.Controllers
         public async Task<IActionResult> AssignTrainer(int memberId, int trainerId, string? workoutPlan, string? notes)
         {
             await _trainerService.AssignMemberAsync(trainerId, memberId, workoutPlan, notes);
+            
+            // Generate the first month's payment for the training charge
+            var trainer = await _trainerService.GetByIdAsync(trainerId);
+            if (trainer != null && trainer.TrainingCharge > 0)
+            {
+                string paymentNotes = $"Monthly Personal Training Fee - {trainer.FullName}";
+                await _paymentService.CreatePaymentAsync(memberId, trainer.TrainingCharge, DateTime.Today.AddDays(30), null, paymentNotes);
+            }
+
             TempData["Success"] = "Trainer assigned successfully!";
             return RedirectToAction(nameof(MemberDetails), new { id = memberId });
         }

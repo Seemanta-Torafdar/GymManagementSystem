@@ -12,14 +12,16 @@ namespace GymManagement.Controllers
         private readonly ITrainerService _trainerService;
         private readonly INotificationService _notificationService;
         private readonly IAdminService _adminService;
+        private readonly IMemberService _memberService;
         private readonly UserManager<User> _userManager;
 
         public TrainerController(ITrainerService trainerService, INotificationService notificationService,
-            IAdminService adminService, UserManager<User> userManager)
+            IAdminService adminService, IMemberService memberService, UserManager<User> userManager)
         {
             _trainerService = trainerService;
             _notificationService = notificationService;
             _adminService = adminService;
+            _memberService = memberService;
             _userManager = userManager;
         }
 
@@ -81,6 +83,26 @@ namespace GymManagement.Controllers
             await _trainerService.UpdateWorkoutPlanAsync(assignmentId, workoutPlan, notes);
             TempData["Success"] = "Workout plan updated!";
             return RedirectToAction(nameof(Students));
+        }
+
+        public async Task<IActionResult> StudentDetails(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+            var trainer = await _trainerService.GetByUserIdAsync(user.Id);
+            if (trainer == null) return RedirectToAction("Login", "Account");
+
+            // Verify this student is assigned to this trainer
+            var isAssigned = trainer.Assignments.Any(a => a.MemberId == id);
+            if (!isAssigned) return Forbid(); // Prevent viewing details of unassigned members
+
+            var student = await _memberService.GetByIdAsync(id);
+            if (student == null) return NotFound();
+            
+            // Pass the specific assignment info to the view as well
+            ViewBag.Assignment = trainer.Assignments.First(a => a.MemberId == id);
+
+            return View(student);
         }
 
         public async Task<IActionResult> Notifications()

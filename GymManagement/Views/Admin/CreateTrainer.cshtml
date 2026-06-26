@@ -64,6 +64,11 @@
                 <input asp-for="MonthlySalary" type="number" step="0.01" class="form-control" />
                 <span asp-validation-for="MonthlySalary" class="field-error"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="TrainingCharge" class="form-label">Monthly Training Charge (৳)</label>
+                <input asp-for="TrainingCharge" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="TrainingCharge" class="field-error"></span>
+            </div>
             <div class="form-group" style="grid-column: span 2">
                 <label asp-for="Certifications" class="form-label">Certifications</label>
                 <input asp-for="Certifications" class="form-control" placeholder="e.g. ACE Certified, ISSA, CPR/AED" />
