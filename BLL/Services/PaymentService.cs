@@ -51,13 +51,15 @@ namespace BLL.Services
             {
                 Id = tp.Id, TrainerId = tp.TrainerId,
                 TrainerName = tp.Trainer?.User != null ? $"{tp.Trainer.User.FirstName} {tp.Trainer.User.LastName}" : "",
-                Month = tp.Month, Year = tp.Year, Amount = tp.Amount, Status = tp.Status, PaidDate = tp.PaidDate
+                Month = tp.Month, Year = tp.Year, Amount = tp.Amount, AmountPaid = tp.AmountPaid, PaymentMethod = tp.PaymentMethod, Status = tp.Status, PaidDate = tp.PaidDate
             });
 
-        public async Task<bool> MarkTrainerPaidAsync(int trainerPaymentId)
+        public async Task<bool> MarkTrainerPaidAsync(int trainerPaymentId, decimal amountPaid, string paymentMethod)
         {
             var tp = await _repo.GetTrainerPaymentByIdAsync(trainerPaymentId);
             if (tp == null) return false;
+            tp.AmountPaid = amountPaid;
+            tp.PaymentMethod = paymentMethod;
             tp.Status = "Paid"; tp.PaidDate = DateTime.Now;
             await _repo.UpdateTrainerPaymentAsync(tp); return true;
         }

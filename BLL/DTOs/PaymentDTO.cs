@@ -22,7 +22,10 @@ namespace BLL.DTOs
         public int Month { get; set; }
         public int Year { get; set; }
         public decimal Amount { get; set; }
+        public decimal AmountPaid { get; set; }
+        public decimal DueAmount => Amount - AmountPaid;
         public string Status { get; set; } = string.Empty;
+        public string PaymentMethod { get; set; } = string.Empty;
         public DateTime? PaidDate { get; set; }
         public string MonthName => new DateTime(Year, Month, 1).ToString("MMMM yyyy");
     }

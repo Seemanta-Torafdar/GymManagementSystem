@@ -18,8 +18,27 @@
 </div>
 
 <div class="table-card">
-    <div class="table-card-header">
+    <div class="table-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
         <span class="table-card-title">All Payments (@Model.Count())</span>
+        
+        <form method="get" action="/Admin/Payments" style="display:flex; gap:10px; align-items:center">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Search by name or notes..." class="form-control" style="width:200px" />
+            <select name="month" class="form-control">
+                <option value="">-- All Months --</option>
+                @for(int m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">
+                        @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                    </option>
+                }
+            </select>
+            <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:100px" />
+            <button type="submit" class="btn-primary" style="padding:8px 16px"><i class="fas fa-filter"></i> Filter</button>
+            @if(ViewBag.Search != null || ViewBag.Month != null || ViewBag.Year != null)
+            {
+                <a asp-action="Payments" class="btn-secondary" style="padding:8px 16px">Clear</a>
+            }
+        </form>
     </div>
     <div style="overflow-x:auto">
         <table class="data-table">

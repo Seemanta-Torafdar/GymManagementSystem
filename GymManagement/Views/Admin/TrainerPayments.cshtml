@@ -65,7 +65,10 @@
                     <tr>
                         <th>Trainer</th>
                         <th>Month/Year</th>
-                        <th>Amount</th>
+                        <th>Total Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Due</th>
+                        <th>Method</th>
                         <th>Status</th>
                         <th>Paid Date</th>
                         <th>Actions</th>
@@ -75,7 +78,7 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="6" style="text-align:center;color:var(--text-muted)">No salary records found.</td>
+                            <td colspan="8" style="text-align:center;color:var(--text-muted)">No salary records found.</td>
                         </tr>
                     }
                     else
@@ -86,6 +89,9 @@
                                 <td><strong>@p.TrainerName</strong></td>
                                 <td>@p.MonthName</td>
                                 <td>৳@p.Amount.ToString("N0")</td>
+                                <td style="color:#4ade80">৳@p.AmountPaid.ToString("N0")</td>
+                                <td style="color:var(--accent)">৳@p.DueAmount.ToString("N0")</td>
+                                <td>@(string.IsNullOrEmpty(p.PaymentMethod) ? "-" : p.PaymentMethod)</td>
                                 <td>
                                     @if (p.Status == "Paid")
                                     {
@@ -100,8 +106,14 @@
                                 <td>
                                     @if (p.Status != "Paid")
                                     {
-                                        <form asp-action="MarkTrainerPaid" method="post" style="display:inline">
+                                        <form asp-action="MarkTrainerPaid" method="post" style="display:flex; flex-direction:column; gap:8px; min-width: 150px;">
                                             <input type="hidden" name="id" value="@p.Id" />
+                                            <input type="number" name="amountPaid" class="form-control" style="padding:4px 8px;font-size:0.85rem;" placeholder="Amount to Pay" value="@p.Amount" required />
+                                            <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.85rem;" required>
+                                                <option value="Cash">Cash</option>
+                                                <option value="Bank Transfer">Bank Transfer</option>
+                                                <option value="bKash">bKash</option>
+                                            </select>
                                             <button type="submit" class="btn-sm btn-success" data-confirm="Mark this salary as paid?">Mark Paid</button>
                                         </form>
                                     }

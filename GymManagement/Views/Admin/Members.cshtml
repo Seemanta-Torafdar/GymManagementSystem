@@ -13,6 +13,38 @@
     </div>
 </div>
 
+<div class="grid-3" style="margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-label">Total Members</div>
+        <div class="stat-value">@ViewBag.TotalMembers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active Subscriptions</div>
+        <div class="stat-value" style="color:#4ade80">@ViewBag.ActiveMembers</div>
+    </div>
+    <div class="stat-card" style="padding:16px; display:flex; flex-direction:column; justify-content:center;">
+        <div class="stat-label" style="margin-bottom:12px;">Package Distribution</div>
+        @if (ViewBag.PackageDistribution != null)
+        {
+            var dict = ViewBag.PackageDistribution as Dictionary<string, int>;
+            if (dict != null && dict.Count > 0)
+            {
+                <select class="form-control" style="background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; padding:8px 12px; font-size:0.9rem; cursor:pointer;">
+                    <option value="" disabled selected>View Distribution...</option>
+                    @foreach (var kvp in dict)
+                    {
+                        <option value="@kvp.Key">@kvp.Key (@kvp.Value members)</option>
+                    }
+                </select>
+            }
+            else
+            {
+                <p style="color:var(--text-muted);font-size:0.9rem; margin:0;">No packages assigned.</p>
+            }
+        }
+    </div>
+</div>
+
 <div class="table-card">
     <div class="table-card-header">
         <span class="table-card-title">All Members (@Model.Count())</span>

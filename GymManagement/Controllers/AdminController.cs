@@ -46,6 +46,14 @@ namespace GymManagement.Controllers
                 members = await _memberService.SearchAsync(search);
             else
                 members = await _memberService.GetAllAsync();
+            
+            // Calculate Stats for the Dashboard
+            ViewBag.TotalMembers = members.Count();
+            ViewBag.ActiveMembers = members.Count(m => m.IsActive);
+            ViewBag.PackageDistribution = members
+                .GroupBy(m => string.IsNullOrEmpty(m.ActivePackageName) ? "No Package" : m.ActivePackageName)
+                .ToDictionary(g => g.Key, g => g.Count());
+
             ViewBag.Search = search;
             return View(members);
         }
@@ -224,6 +232,10 @@ namespace GymManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> AssignTrainer(int memberId, int trainerId, string? workoutPlan, string? notes)
         {
+            // First, remove any existing trainer assignment for this member
+            await _trainerService.RemoveTrainerAssignmentAsync(memberId);
+            
+            // Then, assign the new trainer
             await _trainerService.AssignMemberAsync(trainerId, memberId, workoutPlan, notes);
             
             // Generate the first month's payment for the training charge
@@ -369,10 +381,28 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Equipment));
         }
 
-        // Payments
-        public async Task<IActionResult> Payments()
+        public async Task<IActionResult> Payments(string? search, int? month, int? year)
         {
             var payments = await _paymentService.GetAllAsync();
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                payments = payments.Where(p => 
+                    p.MemberName.ToLower().Contains(search) || 
+                    (p.Notes != null && p.Notes.ToLower().Contains(search))
+                ).ToList();
+            }
+            if (month.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate?.Month == month.Value || p.DueDate.Month == month.Value).ToList();
+            }
+            if (year.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate?.Year == year.Value || p.DueDate.Year == year.Value).ToList();
+            }
+            ViewBag.Search = search;
+            ViewBag.Month = month;
+            ViewBag.Year = year;
             ViewBag.MonthlyRevenue = await _paymentService.GetMonthlyRevenueAsync(DateTime.Now.Month, DateTime.Now.Year);
             return View(payments);
         }
@@ -401,9 +431,9 @@ namespace GymManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> MarkTrainerPaid(int id)
+        public async Task<IActionResult> MarkTrainerPaid(int id, decimal amountPaid, string paymentMethod)
         {
-            await _paymentService.MarkTrainerPaidAsync(id);
+            await _paymentService.MarkTrainerPaidAsync(id, amountPaid, paymentMethod);
             TempData["Success"] = "Trainer payment marked as paid.";
             return RedirectToAction(nameof(TrainerPayments));
         }
