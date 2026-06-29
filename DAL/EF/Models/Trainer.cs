@@ -13,6 +13,9 @@ namespace DAL.EF.Models
         public string? Certifications { get; set; }
         public bool IsAvailable { get; set; } = true;
         public DateTime JoinDate { get; set; } = DateTime.Now;
+        public DateTime DateOfBirth { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string? TrainingTime { get; set; }
 
         // Navigation
         public virtual User User { get; set; } = null!;

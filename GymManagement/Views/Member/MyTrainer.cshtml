@@ -24,14 +24,38 @@
                     <i class="fas fa-link"></i> Your Allocated Trainer
                 </div>
                 <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:6px">@Model.AssignedTrainerName</h2>
-                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px">
-                    This trainer has been assigned to you by the gym admin.
-                </p>
+                
+                @if (ViewBag.Trainer != null)
+                {
+                    var t = (BLL.DTOs.TrainerDTO)ViewBag.Trainer;
+                    <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:6px;">
+                        <div><i class="fas fa-envelope text-muted"></i> @t.Email</div>
+                        <div><i class="fas fa-phone text-muted"></i> @(string.IsNullOrEmpty(t.Phone) ? "N/A" : t.Phone)</div>
+                        <div><i class="fas fa-birthday-cake text-muted"></i> @(t.DateOfBirth != DateTime.MinValue ? (DateTime.Today.Year - t.DateOfBirth.Year) + " Years Old" : "Age Not Set")</div>
+                        <div><i class="fas fa-briefcase text-muted"></i> @t.Experience Years Experience</div>
+                        <div><i class="fas fa-clock text-muted"></i> Training Time: @(string.IsNullOrEmpty(t.TrainingTime) ? "Not Set" : t.TrainingTime)</div>
+                    </div>
+                }
+
                 <a asp-action="TrainerProfile" asp-route-id="@Model.AssignedTrainerId" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px">
                     <i class="fas fa-eye"></i> View Full Profile & Reviews
                 </a>
             </div>
         </div>
+        
+        @if (ViewBag.Assignment != null && !string.IsNullOrEmpty(((BLL.DTOs.TrainerAssignmentDTO)ViewBag.Assignment).WorkoutPlan))
+        {
+            var a = (BLL.DTOs.TrainerAssignmentDTO)ViewBag.Assignment;
+            <div style="margin-top:24px;padding:20px;background:var(--bg-secondary);border-radius:var(--radius);border:1px solid var(--border)">
+                <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent)">
+                    <i class="fas fa-dumbbell"></i> Your Workout Plan
+                </h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:12px">Your trainer has uploaded a workout plan for you.</p>
+                <a href="@a.WorkoutPlan" target="_blank" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px">
+                    <i class="fas fa-download"></i> Download / View Workout Plan
+                </a>
+            </div>
+        }
 
         <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border)">
             <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--text-muted)">

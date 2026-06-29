@@ -78,9 +78,21 @@ namespace GymManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateWorkout(int assignmentId, string workoutPlan, string notes)
+        public async Task<IActionResult> UpdateWorkout(int assignmentId, IFormFile? workoutPlanFile, string? existingWorkoutPlan, string notes)
         {
-            await _trainerService.UpdateWorkoutPlanAsync(assignmentId, workoutPlan, notes);
+            string workoutPlanPath = existingWorkoutPlan ?? "";
+            
+            if (workoutPlanFile != null && workoutPlanFile.Length > 0)
+            {
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "workouts");
+                Directory.CreateDirectory(uploadsPath);
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(workoutPlanFile.FileName)}";
+                using var stream = new FileStream(Path.Combine(uploadsPath, fileName), FileMode.Create);
+                await workoutPlanFile.CopyToAsync(stream);
+                workoutPlanPath = $"/uploads/workouts/{fileName}";
+            }
+
+            await _trainerService.UpdateWorkoutPlanAsync(assignmentId, workoutPlanPath, notes);
             TempData["Success"] = "Workout plan updated!";
             return RedirectToAction(nameof(Students));
         }
@@ -114,13 +126,19 @@ namespace GymManagement.Controllers
             return View(notifications);
         }
 
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
         {
             if (newPassword != confirmPassword)
             {
                 TempData["Error"] = "New passwords do not match.";
-                return RedirectToAction(nameof(Profile));
+                return RedirectToAction(nameof(ChangePassword));
             }
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
@@ -134,7 +152,7 @@ namespace GymManagement.Controllers
             {
                 TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
             }
-            return RedirectToAction(nameof(Profile));
+            return RedirectToAction(nameof(ChangePassword));
         }
     }
 }

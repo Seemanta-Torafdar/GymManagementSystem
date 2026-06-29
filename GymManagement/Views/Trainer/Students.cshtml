@@ -56,12 +56,19 @@ else
 
                 <!-- Workout Plan Section -->
                 <div style="padding:20px">
-                    <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:14px">
+                    <form asp-action="UpdateWorkout" method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:14px">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="assignmentId" value="@a.Id" />
+                        <input type="hidden" name="existingWorkoutPlan" value="@a.WorkoutPlan" />
                         <div class="form-group" style="margin:0">
-                            <label class="form-label"><i class="fas fa-link"></i> Workout Plan URL</label>
-                            <input type="url" name="workoutPlan" class="form-control" value="@a.WorkoutPlan" placeholder="https://docs.google.com/..." />
+                            <label class="form-label"><i class="fas fa-file-upload"></i> Upload Workout Plan (PDF/Image/Word)</label>
+                            @if (!string.IsNullOrEmpty(a.WorkoutPlan))
+                            {
+                                <div style="margin-bottom:8px;font-size:0.85rem;color:var(--text-muted)">
+                                    Current Plan: <a href="@a.WorkoutPlan" target="_blank" style="color:var(--accent);text-decoration:none"><i class="fas fa-external-link-alt"></i> View Existing Plan</a>
+                                </div>
+                            }
+                            <input type="file" name="workoutPlanFile" class="form-control" accept=".pdf,.doc,.docx,image/*" />
                         </div>
                         <div class="form-group" style="margin:0">
                             <label class="form-label"><i class="fas fa-sticky-note"></i> Training Notes</label>

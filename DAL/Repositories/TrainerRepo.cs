@@ -19,12 +19,18 @@ namespace DAL.Repositories
         public async Task<Trainer?> GetByIdAsync(int id) =>
             await _context.Trainers.Include(t => t.User)
                 .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.User)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.Shift)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.YogaSchedule)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.CardioSchedule)
                 .Include(t => t.TrainerReviews).ThenInclude(r => r.Member).ThenInclude(m => m.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
         public async Task<Trainer?> GetByUserIdAsync(string userId) =>
             await _context.Trainers.Include(t => t.User)
                 .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.User)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.Shift)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.YogaSchedule)
+                .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.CardioSchedule)
                 .Include(t => t.TrainerReviews)
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
@@ -45,8 +51,19 @@ namespace DAL.Repositories
         }
         public async Task<int> GetTotalCountAsync() => await _context.Trainers.CountAsync();
         public async Task<IEnumerable<TrainerAssignment>> GetAssignmentsByTrainerIdAsync(int trainerId) =>
-            await _context.TrainerAssignments.Include(ta => ta.Member).ThenInclude(m => m.User)
+            await _context.TrainerAssignments
+                .Include(ta => ta.Member)
+                .ThenInclude(m => m.User)
                 .Where(ta => ta.TrainerId == trainerId && ta.IsActive)
                 .ToListAsync();
+
+        public async Task<TrainerAssignment?> GetAssignmentByIdAsync(int id) =>
+            await _context.TrainerAssignments.FindAsync(id);
+
+        public async Task UpdateTrainerAssignmentAsync(TrainerAssignment assignment)
+        {
+            _context.TrainerAssignments.Update(assignment);
+            await _context.SaveChangesAsync();
+        }
     }
 }

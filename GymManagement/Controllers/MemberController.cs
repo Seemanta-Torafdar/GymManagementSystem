@@ -123,6 +123,17 @@ namespace GymManagement.Controllers
             if (user == null) return RedirectToAction("Login", "Account");
             var member = await _memberService.GetByUserIdAsync(user.Id);
             if (member == null) return RedirectToAction(nameof(Dashboard));
+
+            if (member.AssignedTrainerId.HasValue)
+            {
+                var trainer = await _trainerService.GetByIdAsync(member.AssignedTrainerId.Value);
+                if (trainer != null)
+                {
+                    ViewBag.Trainer = trainer;
+                    ViewBag.Assignment = trainer.Assignments.FirstOrDefault(a => a.MemberId == member.Id);
+                }
+            }
+
             return View(member);
         }
 

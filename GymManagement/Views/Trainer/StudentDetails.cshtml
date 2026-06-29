@@ -58,12 +58,19 @@
     <!-- Active Workout Plan -->
     <div class="card" style="padding:24px">
         <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-clipboard-list"></i> Current Workout Plan</h3>
-        <form asp-action="UpdateWorkout" method="post" style="display:flex;flex-direction:column;gap:16px">
+        <form asp-action="UpdateWorkout" method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:16px">
             @Html.AntiForgeryToken()
             <input type="hidden" name="assignmentId" value="@assignment?.Id" />
+            <input type="hidden" name="existingWorkoutPlan" value="@assignment?.WorkoutPlan" />
             <div class="form-group" style="margin:0">
-                <label class="form-label">Plan URL</label>
-                <input type="url" name="workoutPlan" class="form-control" value="@assignment?.WorkoutPlan" placeholder="https://..." />
+                <label class="form-label">Upload Plan (PDF/Image/Word)</label>
+                @if (!string.IsNullOrEmpty(assignment?.WorkoutPlan))
+                {
+                    <div style="margin-bottom:8px;font-size:0.85rem;color:var(--text-muted)">
+                        Current Plan: <a href="@assignment.WorkoutPlan" target="_blank" style="color:var(--accent);text-decoration:none"><i class="fas fa-external-link-alt"></i> View Existing Plan</a>
+                    </div>
+                }
+                <input type="file" name="workoutPlanFile" class="form-control" accept=".pdf,.doc,.docx,image/*" />
             </div>
             <div class="form-group" style="margin:0">
                 <label class="form-label">Trainer Notes</label>

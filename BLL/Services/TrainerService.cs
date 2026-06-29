@@ -71,7 +71,10 @@ namespace BLL.Services
                 MonthlySalary = dto.MonthlySalary,
                 TrainingCharge = dto.TrainingCharge,
                 Bio = dto.Bio,
-                Certifications = dto.Certifications
+                Certifications = dto.Certifications,
+                DateOfBirth = dto.DateOfBirth,
+                Phone = dto.Phone,
+                TrainingTime = dto.TrainingTime
             };
             await _trainerRepo.AddAsync(trainer);
             
@@ -93,6 +96,9 @@ namespace BLL.Services
             trainer.Bio = dto.Bio;
             trainer.Certifications = dto.Certifications;
             trainer.IsAvailable = dto.IsAvailable;
+            trainer.DateOfBirth = dto.DateOfBirth;
+            trainer.Phone = dto.Phone;
+            trainer.TrainingTime = dto.TrainingTime;
             if (!string.IsNullOrEmpty(dto.ProfilePhoto))
             {
                 var user = await _userManager.FindByIdAsync(trainer.UserId);
@@ -164,7 +170,15 @@ namespace BLL.Services
 
         public async Task<bool> UpdateWorkoutPlanAsync(int assignmentId, string workoutPlan, string notes)
         {
-            // Handled via direct repo update
+            var assignment = await _trainerRepo.GetAssignmentByIdAsync(assignmentId);
+            if (assignment == null) return false;
+            
+            // If the workoutPlan parameter is empty but they didn't upload a new file, we shouldn't wipe out the existing one unless they cleared it. 
+            // In the controller, we passed `workoutPlanPath`. We should just set it directly.
+            assignment.WorkoutPlan = workoutPlan;
+            assignment.TrainingNotes = notes;
+            
+            await _trainerRepo.UpdateTrainerAssignmentAsync(assignment);
             return true;
         }
 
@@ -185,20 +199,34 @@ namespace BLL.Services
             ProfilePhoto = t.User?.ProfilePhoto,
             IsAvailable = t.IsAvailable,
             JoinDate = t.JoinDate,
+            DateOfBirth = t.DateOfBirth,
+            Phone = t.Phone,
+            TrainingTime = t.TrainingTime,
             AssignedMembersCount = t.TrainerAssignments?.Count(ta => ta.IsActive) ?? 0,
             AverageRating = Math.Round(avgRating, 1),
             TotalReviews = t.TrainerReviews?.Count ?? 0,
-            Assignments = t.TrainerAssignments?.Where(ta => ta.IsActive).Select(ta => new TrainerAssignmentDTO
+            Assignments = t.TrainerAssignments?.Where(ta => ta.IsActive).Select(ta => 
             {
-                Id = ta.Id,
-                MemberId = ta.MemberId,
-                MemberGymId = ta.Member?.GymId ?? "",
-                MemberName = (ta.Member?.User?.FirstName + " " + ta.Member?.User?.LastName).Trim(),
-                MemberPhoto = ta.Member?.User?.ProfilePhoto,
-                WorkoutPlan = ta.WorkoutPlan,
-                TrainingNotes = ta.TrainingNotes,
-                AssignedDate = ta.AssignedDate,
-                IsActive = ta.IsActive
+                var activePurchase = ta.Member?.MembershipPurchases?.FirstOrDefault(mp => mp.IsActive);
+                var workoutTime = activePurchase != null ? activePurchase.Shift?.ShiftName : "Not Set";
+                
+                return new TrainerAssignmentDTO
+                {
+                    Id = ta.Id,
+                    MemberId = ta.MemberId,
+                    MemberGymId = ta.Member?.GymId ?? "",
+                    MemberName = (ta.Member?.User?.FirstName + " " + ta.Member?.User?.LastName).Trim(),
+                    MemberPhoto = ta.Member?.User?.ProfilePhoto,
+                    MemberAge = ta.Member?.DateOfBirth != null && ta.Member.DateOfBirth != DateTime.MinValue ? DateTime.Today.Year - ta.Member.DateOfBirth.Year : 0,
+                    MemberBloodGroup = ta.Member?.BloodGroup,
+                    MemberEmail = ta.Member?.User?.Email ?? "",
+                    MemberPhone = ta.Member?.Phone ?? "",
+                    MemberWorkoutTime = workoutTime,
+                    WorkoutPlan = ta.WorkoutPlan,
+                    TrainingNotes = ta.TrainingNotes,
+                    AssignedDate = ta.AssignedDate,
+                    IsActive = ta.IsActive
+                };
             }).ToList() ?? new List<TrainerAssignmentDTO>()
         };
     }

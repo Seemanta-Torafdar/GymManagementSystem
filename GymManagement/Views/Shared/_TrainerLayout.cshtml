@@ -30,6 +30,9 @@
                 <a asp-controller="Trainer" asp-action="Notifications" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Notifications" ? "active" : "")">
                     <i class="fas fa-bell"></i><span>Notifications</span>
                 </a>
+                <a asp-controller="Trainer" asp-action="ChangePassword" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "ChangePassword" ? "active" : "")">
+                    <i class="fas fa-shield-alt"></i><span>Change Password</span>
+                </a>
             </div>
             <div class="nav-group">
                 <form asp-controller="Account" asp-action="Logout" method="post">

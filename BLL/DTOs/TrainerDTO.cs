@@ -20,6 +20,9 @@ namespace BLL.DTOs
         public string? ProfilePhoto { get; set; }
         public bool IsAvailable { get; set; }
         public DateTime JoinDate { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string? TrainingTime { get; set; }
         public int AssignedMembersCount { get; set; }
         public double AverageRating { get; set; }
         public int TotalReviews { get; set; }
@@ -55,6 +58,14 @@ namespace BLL.DTOs
         public string? Bio { get; set; }
         public string? Certifications { get; set; }
         public string? ProfilePhoto { get; set; }
+        
+        [Required(ErrorMessage = "Date of Birth is required.")]
+        public DateTime DateOfBirth { get; set; }
+        
+        [Required(ErrorMessage = "Phone number is required.")]
+        public string Phone { get; set; } = string.Empty;
+        
+        public string? TrainingTime { get; set; }
     }
 
     public class TrainerEditDTO
@@ -68,6 +79,9 @@ namespace BLL.DTOs
         public string? Certifications { get; set; }
         public bool IsAvailable { get; set; }
         public string? ProfilePhoto { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string? TrainingTime { get; set; }
     }
 
     public class TrainerAssignmentDTO
@@ -77,6 +91,11 @@ namespace BLL.DTOs
         public string MemberGymId { get; set; } = string.Empty;
         public string MemberName { get; set; } = string.Empty;
         public string? MemberPhoto { get; set; }
+        public int MemberAge { get; set; }
+        public string? MemberBloodGroup { get; set; }
+        public string MemberEmail { get; set; } = string.Empty;
+        public string MemberPhone { get; set; } = string.Empty;
+        public string? MemberWorkoutTime { get; set; }
         public string? WorkoutPlan { get; set; }
         public string? TrainingNotes { get; set; }
         public DateTime AssignedDate { get; set; }
