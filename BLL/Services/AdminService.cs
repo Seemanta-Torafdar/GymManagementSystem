@@ -37,24 +37,24 @@ namespace BLL.Services
                 ExpiredMemberships = await _membershipRepo.GetExpiredMembershipsCountAsync(),
                 PendingPayments = await _paymentRepo.GetPendingCountAsync(),
                 MonthlyRevenue = await _paymentRepo.GetMonthlyRevenueAsync(now.Month, now.Year),
-                PendingTrainerPayments = allTrainerPayments.Count(tp => tp.Status == "Pending"),
+                PendingTrainerPayments = allTrainerPayments.Count(tp => tp.PaymentStatus == "Unpaid" || tp.PaymentStatus == "Partial Paid"),
                 LowStockEquipment = allInventory.Count(i => i.StockStatus == "Low" || i.StockStatus == "OutOfStock"),
                 RecentPayments = allPayments.Take(5).Select(p => new PaymentDTO
                 {
                     Id = p.Id, MemberId = p.MemberId,
                     MemberName = p.Member?.User != null ? $"{p.Member.User.FirstName} {p.Member.User.LastName}" : "",
-                    Amount = p.Amount, Status = p.Status, PaymentDate = p.PaymentDate, DueDate = p.DueDate
+                    TotalAmount = p.TotalAmount, AmountPaid = p.AmountPaid, PaymentStatus = p.PaymentStatus, PaymentDate = p.PaymentDate, DueDate = p.DueDate
                 }).ToList(),
                 RecentMembers = recentMembers.Select(m => new MemberDTO
                 {
                     Id = m.Id, FirstName = m.User?.FirstName ?? "", LastName = m.User?.LastName ?? "",
                     Email = m.User?.Email ?? "", Phone = m.Phone, JoinDate = m.JoinDate
                 }).ToList(),
-                PendingTrainerPaymentList = allTrainerPayments.Where(tp => tp.Status == "Pending").Select(tp => new TrainerPaymentDTO
+                PendingTrainerPaymentList = allTrainerPayments.Where(tp => tp.PaymentStatus != "Paid").Select(tp => new TrainerPaymentDTO
                 {
                     Id = tp.Id, TrainerId = tp.TrainerId,
                     TrainerName = tp.Trainer?.User != null ? $"{tp.Trainer.User.FirstName} {tp.Trainer.User.LastName}" : "",
-                    Month = tp.Month, Year = tp.Year, Amount = tp.Amount, Status = tp.Status
+                    Month = tp.Month, Year = tp.Year, TotalSalary = tp.TotalSalary, AmountPaid = tp.AmountPaid, PaymentStatus = tp.PaymentStatus
                 }).ToList()
             };
         }

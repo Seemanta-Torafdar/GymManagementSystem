@@ -1,0 +1,127 @@
+﻿@model IEnumerable<BLL.DTOs.PersonalTrainingSessionDTO>
+@{
+    ViewData["Title"] = "Personal Training";
+    Layout = "_AdminLayout";
+    var trainers = ViewBag.Trainers as IEnumerable<BLL.DTOs.TrainerDTO> ?? new List<BLL.DTOs.TrainerDTO>();
+    var members = ViewBag.Members as IEnumerable<BLL.DTOs.MemberDTO> ?? new List<BLL.DTOs.MemberDTO>();
+    decimal totalEarnings = Model.Sum(s => s.ChargePerSession);
+    decimal totalPaid = Model.Sum(s => s.AmountPaid);
+    decimal totalDue = Model.Sum(s => s.DueAmount);
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-dumbbell" style="color:var(--accent)"></i> Personal Training</h1>
+        <p>Manage 1-on-1 personal training sessions and payments.</p>
+    </div>
+</div>
+
+<div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-card-icon green"><i class="fas fa-receipt"></i></div><div class="stat-value">@Model.Count()</div><div class="stat-label">Total Sessions</div></div>
+    <div class="stat-card"><div class="stat-card-icon blue"><i class="fas fa-money-bill"></i></div><div class="stat-value">৳@totalEarnings.ToString("N0")</div><div class="stat-label">Total Earnings</div></div>
+    <div class="stat-card"><div class="stat-card-icon green"><i class="fas fa-check"></i></div><div class="stat-value">৳@totalPaid.ToString("N0")</div><div class="stat-label">Total Paid</div></div>
+    <div class="stat-card"><div class="stat-card-icon red"><i class="fas fa-exclamation"></i></div><div class="stat-value">৳@totalDue.ToString("N0")</div><div class="stat-label">Total Due</div></div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:300px 1fr;align-items:start">
+    <!-- Create Session -->
+    <div class="card">
+        <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-plus"></i> Book Session</h3>
+        <form asp-action="CreatePTSession" method="post">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="form-label">Trainer</label>
+                <select name="trainerId" class="form-control" required>
+                    <option value="">-- Select Trainer --</option>
+                    @foreach (var t in trainers) { <option value="@t.Id">@t.FullName</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Member</label>
+                <select name="memberId" class="form-control" required>
+                    <option value="">-- Select Member --</option>
+                    @foreach (var m in members) { <option value="@m.Id">@m.FullName</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Session Date</label>
+                <input type="date" name="sessionDate" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Time Slot (e.g. 08:00-10:00)</label>
+                <input type="text" name="timeSlot" class="form-control" placeholder="08:00-10:00" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Charge per Session (৳)</label>
+                <input type="number" name="charge" class="form-control" step="0.01" required placeholder="e.g. 1000" />
+            </div>
+            <button type="submit" class="btn-primary" style="width:100%;margin-top:8px"><i class="fas fa-plus"></i> Create Session</button>
+        </form>
+    </div>
+
+    <!-- Sessions Table -->
+    <div class="card" style="padding:0">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <h3 style="font-size:1.1rem;font-weight:700;margin:0">Sessions (@Model.Count())</h3>
+            <form method="get" action="/Admin/PersonalTraining" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select name="trainerId" class="form-control" style="width:150px">
+                    <option value="">All Trainers</option>
+                    @foreach (var t in trainers) { <option value="@t.Id" selected="@(ViewBag.TrainerId == t.Id ? "selected" : null)">@t.FullName</option> }
+                </select>
+                <select name="month" class="form-control" style="width:120px">
+                    <option value="">All Months</option>
+                    @for (int m = 1; m <= 12; m++) {
+                        <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                    }
+                </select>
+                <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:85px" />
+                <button type="submit" class="btn-primary" style="padding:8px 14px"><i class="fas fa-filter"></i></button>
+            </form>
+        </div>
+        <div style="padding:20px;overflow-x:auto">
+            <table class="data-table">
+                <thead><tr>
+                    <th>Trainer</th><th>Member</th><th>Date</th><th>Slot</th>
+                    <th>Charge</th><th>Paid</th><th>Due</th><th>Status</th><th>Pay</th>
+                </tr></thead>
+                <tbody>
+                    @if (!Model.Any()) {
+                        <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted)">No sessions found. Create one using the form.</td></tr>
+                    }
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@s.TrainerName</strong></td>
+                            <td>@s.MemberName</td>
+                            <td>@s.SessionDate.ToString("MMM dd, yyyy")</td>
+                            <td><span class="badge badge-accent">@s.TimeSlot</span></td>
+                            <td>৳@s.ChargePerSession.ToString("N0")</td>
+                            <td style="color:#4ade80">৳@s.AmountPaid.ToString("N0")</td>
+                            <td style="color:var(--accent)">৳@s.DueAmount.ToString("N0")</td>
+                            <td>
+                                @if (s.PaymentStatus == "Paid") { <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> }
+                                else if (s.PaymentStatus == "Partial Paid") { <span class="badge badge-warning"><i class="fas fa-adjust"></i> Partial</span> }
+                                else { <span class="badge badge-danger"><i class="fas fa-times"></i> Unpaid</span> }
+                            </td>
+                            <td>
+                                @if (s.PaymentStatus != "Paid")
+                                {
+                                    <form asp-action="PayPTSession" method="post" style="display:flex;flex-direction:column;gap:4px;min-width:155px">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <input type="number" name="amountPaid" class="form-control" style="padding:4px 8px;font-size:0.82rem" value="@s.DueAmount" step="0.01" required />
+                                        <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.82rem">
+                                            <option>Cash</option><option>Bank Transfer</option><option>bKash</option>
+                                        </select>
+                                        <button type="submit" class="btn-sm btn-success"><i class="fas fa-check"></i> Pay</button>
+                                    </form>
+                                }
+                                else { <span style="color:#4ade80"><i class="fas fa-check-circle"></i> Done</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

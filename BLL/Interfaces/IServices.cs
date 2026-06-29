@@ -59,16 +59,28 @@ namespace BLL.Interfaces
 
     public interface IPaymentService
     {
+        // Member Payments
         Task<IEnumerable<PaymentDTO>> GetAllAsync();
+        Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year);
         Task<IEnumerable<PaymentDTO>> GetByMemberIdAsync(int memberId);
+        Task<bool> RecordMemberPaymentAsync(int paymentId, decimal amountPaid, string paymentMethod, string? notes);
         Task<bool> MarkAsPaidAsync(int paymentId);
         Task<bool> MarkAsUnpaidAsync(int paymentId);
-        Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId, string? notes = null);
+        Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId, string? packageName = null, string? notes = null);
         Task<decimal> GetMonthlyRevenueAsync(int month, int year);
 
+        // Trainer Salary
         Task<IEnumerable<TrainerPaymentDTO>> GetAllTrainerPaymentsAsync();
-        Task<bool> MarkTrainerPaidAsync(int trainerPaymentId, decimal amountPaid, string paymentMethod);
-        Task<bool> CreateTrainerPaymentAsync(int trainerId, int month, int year, decimal amount);
+        Task<IEnumerable<TrainerPaymentDTO>> GetFilteredTrainerPaymentsAsync(int? trainerId, int? month, int? year);
+        Task<IEnumerable<TrainerPaymentDTO>> GetTrainerSalaryHistoryAsync(int trainerId);
+        Task<bool> PayTrainerSalaryAsync(int trainerPaymentId, decimal amountToPay, string paymentMethod, string? notes);
+        Task<bool> CreateTrainerPaymentAsync(int trainerId, int month, int year, decimal totalSalary);
+
+        // Personal Training Sessions
+        Task<IEnumerable<PersonalTrainingSessionDTO>> GetAllPTSessionsAsync();
+        Task<IEnumerable<PersonalTrainingSessionDTO>> GetFilteredPTSessionsAsync(int? trainerId, int? month, int? year);
+        Task<bool> CreatePTSessionAsync(int trainerId, int memberId, DateTime date, string timeSlot, decimal charge);
+        Task<bool> PayPTSessionAsync(int sessionId, decimal amountPaid, string paymentMethod, string? notes);
     }
 
     public interface IEquipmentService

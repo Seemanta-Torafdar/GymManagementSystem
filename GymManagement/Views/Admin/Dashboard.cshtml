@@ -120,13 +120,9 @@
                     <tr>
                         <td><strong>@tp.TrainerName</strong></td>
                         <td><span class="badge badge-warning">@tp.MonthName</span></td>
-                        <td>৳@tp.Amount.ToString("N0")</td>
+                        <td>৳@tp.TotalSalary.ToString("N0") <span style="color:var(--accent);font-size:0.8rem">(Due: ৳@tp.DueAmount.ToString("N0"))</span></td>
                         <td>
-                            <form asp-controller="Admin" asp-action="MarkTrainerPaid" method="post" style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@tp.Id" />
-                                <button type="submit" class="btn-success btn-sm">Pay</button>
-                            </form>
+                            <a asp-controller="Admin" asp-action="TrainerPayments" class="btn-success btn-sm">Pay</a>
                         </td>
                     </tr>
                 }

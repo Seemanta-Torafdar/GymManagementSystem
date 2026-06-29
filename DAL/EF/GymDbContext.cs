@@ -22,6 +22,7 @@ namespace DAL.EF
         public DbSet<EquipmentInventory> EquipmentInventories { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<TrainerPayment> TrainerPayments { get; set; }
+        public DbSet<PersonalTrainingSession> PersonalTrainingSessions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<GymSetting> GymSettings { get; set; }
 
@@ -94,9 +95,30 @@ namespace DAL.EF
             builder.Entity<Trainer>()
                 .Property(t => t.TrainingCharge).HasPrecision(18, 2);
             builder.Entity<Payment>()
-                .Property(p => p.Amount).HasPrecision(18, 2);
+                .Property(p => p.TotalAmount).HasPrecision(18, 2);
+            builder.Entity<Payment>()
+                .Property(p => p.AmountPaid).HasPrecision(18, 2);
             builder.Entity<TrainerPayment>()
-                .Property(tp => tp.Amount).HasPrecision(18, 2);
+                .Property(tp => tp.TotalSalary).HasPrecision(18, 2);
+            builder.Entity<TrainerPayment>()
+                .Property(tp => tp.AmountPaid).HasPrecision(18, 2);
+            builder.Entity<Trainer>()
+                .Property(t => t.PersonalTrainingCharge).HasPrecision(18, 2);
+            // PersonalTrainingSession
+            builder.Entity<PersonalTrainingSession>()
+                .Property(pts => pts.ChargePerSession).HasPrecision(18, 2);
+            builder.Entity<PersonalTrainingSession>()
+                .Property(pts => pts.AmountPaid).HasPrecision(18, 2);
+            builder.Entity<PersonalTrainingSession>()
+                .HasOne(pts => pts.Trainer)
+                .WithMany(t => t.PersonalTrainingSessions)
+                .HasForeignKey(pts => pts.TrainerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<PersonalTrainingSession>()
+                .HasOne(pts => pts.Member)
+                .WithMany()
+                .HasForeignKey(pts => pts.MemberId)
+                .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<EquipmentInventory>()
                 .Property(ei => ei.PurchasePrice).HasPrecision(18, 2);
 
@@ -259,17 +281,14 @@ namespace DAL.EF
                 new TrainerAssignment { Id = 2, TrainerId = 2, MemberId = 2, AssignedDate = new DateTime(2024, 3, 10), WorkoutPlan = "3-day full body workout + yoga", TrainingNotes = "Beginner friendly routine", IsActive = true }
             );
 
-            // Payments
-            builder.Entity<Payment>().HasData(
-                new Payment { Id = 1, MemberId = 1, MembershipPurchaseId = 1, Amount = 3500, Status = "Paid", PaymentMethod = "Cash", PaymentDate = new DateTime(2024, 3, 1), DueDate = new DateTime(2024, 3, 1), CreatedAt = new DateTime(2024, 3, 1) },
-                new Payment { Id = 2, MemberId = 2, MembershipPurchaseId = 2, Amount = 1500, Status = "Paid", PaymentMethod = "Cash", PaymentDate = new DateTime(2024, 3, 10), DueDate = new DateTime(2024, 3, 10), CreatedAt = new DateTime(2024, 3, 10) }
-            );
+            // Payments - removed seeded records to start fresh (members were deleted)
+            // builder.Entity<Payment>().HasData(...)
 
             // Trainer Payments
             builder.Entity<TrainerPayment>().HasData(
-                new TrainerPayment { Id = 1, TrainerId = 1, Month = 3, Year = 2024, Amount = 45000, Status = "Paid", PaidDate = new DateTime(2024, 4, 1), CreatedAt = new DateTime(2024, 3, 31) },
-                new TrainerPayment { Id = 2, TrainerId = 2, Month = 3, Year = 2024, Amount = 38000, Status = "Paid", PaidDate = new DateTime(2024, 4, 1), CreatedAt = new DateTime(2024, 3, 31) },
-                new TrainerPayment { Id = 3, TrainerId = 3, Month = 3, Year = 2024, Amount = 35000, Status = "Pending", CreatedAt = new DateTime(2024, 3, 31) }
+                new TrainerPayment { Id = 1, TrainerId = 1, Month = 3, Year = 2024, TotalSalary = 45000, AmountPaid = 45000, PaymentStatus = "Paid", LastPaidDate = new DateTime(2024, 4, 1), CreatedAt = new DateTime(2024, 3, 31) },
+                new TrainerPayment { Id = 2, TrainerId = 2, Month = 3, Year = 2024, TotalSalary = 38000, AmountPaid = 38000, PaymentStatus = "Paid", LastPaidDate = new DateTime(2024, 4, 1), CreatedAt = new DateTime(2024, 3, 31) },
+                new TrainerPayment { Id = 3, TrainerId = 3, Month = 3, Year = 2024, TotalSalary = 35000, AmountPaid = 0, PaymentStatus = "Unpaid", CreatedAt = new DateTime(2024, 3, 31) }
             );
 
             // Reviews

@@ -1,4 +1,4 @@
-@model IEnumerable<BLL.DTOs.TrainerPaymentDTO>
+﻿@model IEnumerable<BLL.DTOs.TrainerPaymentDTO>
 @{
     ViewData["Title"] = "Trainer Salaries";
     Layout = "_AdminLayout";
@@ -8,13 +8,13 @@
 <div class="page-header">
     <div class="page-header-left">
         <h1><i class="fas fa-wallet" style="color:var(--accent)"></i> Trainer Salaries</h1>
-        <p>Manage and process monthly salaries for your trainers.</p>
+        <p>Manage monthly salary payments. Supports full and partial payments.</p>
     </div>
 </div>
 
-<div class="grid-2" style="grid-template-columns: 300px 1fr; align-items: start;">
-    
-    <!-- Generate Payment Form -->
+<div class="grid-2" style="grid-template-columns:300px 1fr;align-items:start;">
+
+    <!-- Generate Salary Record -->
     <div class="card">
         <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-plus"></i> Generate Salary</h3>
         <form asp-action="CreateTrainerPayment" method="post">
@@ -23,18 +23,14 @@
                 <label class="form-label">Trainer</label>
                 <select name="trainerId" class="form-control" required>
                     <option value="">-- Select Trainer --</option>
-                    @foreach (var t in trainers)
-                    {
-                        <option value="@t.Id">@t.FullName</option>
-                    }
+                    @foreach (var t in trainers) { <option value="@t.Id">@t.FullName (Salary: ৳@t.MonthlySalary.ToString("N0"))</option> }
                 </select>
             </div>
             <div class="form-grid">
                 <div class="form-group">
                     <label class="form-label">Month</label>
                     <select name="month" class="form-control" required>
-                        @for (int m = 1; m <= 12; m++)
-                        {
+                        @for (int m = 1; m <= 12; m++) {
                             <option value="@m" selected="@(m == DateTime.Now.Month ? "selected" : null)">
                                 @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
                             </option>
@@ -47,79 +43,79 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Amount (৳)</label>
-                <input type="number" name="amount" class="form-control" step="0.01" required placeholder="e.g. 50000" />
+                <label class="form-label">Total Salary (৳)</label>
+                <input type="number" name="totalSalary" class="form-control" step="0.01" required placeholder="e.g. 50000" />
             </div>
-            <button type="submit" class="btn-primary" style="width:100%;margin-top:10px">Generate Record</button>
+            <button type="submit" class="btn-primary" style="width:100%;margin-top:10px">Create Record</button>
         </form>
     </div>
 
-    <!-- Payments Table -->
+    <!-- Salary Table -->
     <div class="card" style="padding:0">
-        <div style="padding:20px;border-bottom:1px solid var(--border)">
-            <h3 style="font-size:1.1rem;font-weight:700">Salary Records</h3>
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <h3 style="font-size:1.1rem;font-weight:700;margin:0">Salary Records (@Model.Count())</h3>
+            <form method="get" action="/Admin/TrainerPayments" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select name="trainerId" class="form-control" style="width:160px">
+                    <option value="">All Trainers</option>
+                    @foreach (var t in trainers) { <option value="@t.Id" selected="@(ViewBag.TrainerId == t.Id ? "selected" : null)">@t.FullName</option> }
+                </select>
+                <select name="month" class="form-control" style="width:120px">
+                    <option value="">All Months</option>
+                    @for (int m = 1; m <= 12; m++) {
+                        <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                    }
+                </select>
+                <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:85px" />
+                <button type="submit" class="btn-primary" style="padding:8px 14px"><i class="fas fa-filter"></i></button>
+            </form>
         </div>
-        <div style="padding:20px; overflow-x:auto;">
+        <div style="padding:20px;overflow-x:auto">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Trainer</th>
-                        <th>Month/Year</th>
-                        <th>Total Amount</th>
-                        <th>Amount Paid</th>
-                        <th>Due</th>
-                        <th>Method</th>
-                        <th>Status</th>
-                        <th>Paid Date</th>
-                        <th>Actions</th>
+                        <th>Trainer</th><th>Month/Year</th><th>Total Salary</th><th>Paid</th><th>Due</th>
+                        <th>Status</th><th>Method</th><th>Last Paid</th><th>Pay Now</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!Model.Any())
+                    @if (!Model.Any()) {
+                        <tr><td colspan="9" style="text-align:center;color:var(--text-muted)">No salary records found.</td></tr>
+                    }
+                    @foreach (var p in Model.OrderByDescending(x => x.Year).ThenByDescending(x => x.Month))
                     {
                         <tr>
-                            <td colspan="8" style="text-align:center;color:var(--text-muted)">No salary records found.</td>
+                            <td><strong>@p.TrainerName</strong></td>
+                            <td>@p.MonthName</td>
+                            <td style="font-weight:700">৳@p.TotalSalary.ToString("N0")</td>
+                            <td style="color:#4ade80">৳@p.AmountPaid.ToString("N0")</td>
+                            <td style="color:var(--accent)">৳@p.DueAmount.ToString("N0")</td>
+                            <td>
+                                @if (p.PaymentStatus == "Paid")
+                                { <span class="badge-success"><i class="fas fa-check"></i> Paid</span> }
+                                else if (p.PaymentStatus == "Partial Paid")
+                                { <span class="badge-warning"><i class="fas fa-adjust"></i> Partial</span> }
+                                else
+                                { <span class="badge-danger"><i class="fas fa-times"></i> Unpaid</span> }
+                            </td>
+                            <td>@(string.IsNullOrEmpty(p.PaymentMethod) ? "—" : p.PaymentMethod)</td>
+                            <td>@(p.LastPaidDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                            <td>
+                                @if (p.PaymentStatus != "Paid")
+                                {
+                                    <form asp-action="PayTrainerSalary" method="post" style="display:flex;flex-direction:column;gap:6px;min-width:170px">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <input type="number" name="amountToPay" class="form-control" style="padding:4px 8px;font-size:0.82rem" placeholder="Amount" value="@p.DueAmount" step="0.01" required />
+                                        <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.82rem">
+                                            <option>Cash</option><option>Bank Transfer</option><option>bKash</option>
+                                        </select>
+                                        <input type="text" name="notes" class="form-control" style="padding:4px 8px;font-size:0.82rem" placeholder="Notes (optional)" />
+                                        <button type="submit" class="btn-sm btn-success"><i class="fas fa-check"></i> Pay</button>
+                                    </form>
+                                }
+                                else { <span style="color:#4ade80"><i class="fas fa-check-circle"></i> Fully Paid</span> }
+                            </td>
                         </tr>
-                    }
-                    else
-                    {
-                        @foreach (var p in Model.OrderByDescending(x => x.Year).ThenByDescending(x => x.Month))
-                        {
-                            <tr>
-                                <td><strong>@p.TrainerName</strong></td>
-                                <td>@p.MonthName</td>
-                                <td>৳@p.Amount.ToString("N0")</td>
-                                <td style="color:#4ade80">৳@p.AmountPaid.ToString("N0")</td>
-                                <td style="color:var(--accent)">৳@p.DueAmount.ToString("N0")</td>
-                                <td>@(string.IsNullOrEmpty(p.PaymentMethod) ? "-" : p.PaymentMethod)</td>
-                                <td>
-                                    @if (p.Status == "Paid")
-                                    {
-                                        <span class="badge-success"><i class="fas fa-check"></i> Paid</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge-warning"><i class="fas fa-clock"></i> Pending</span>
-                                    }
-                                </td>
-                                <td>@(p.PaidDate?.ToString("MMM dd, yyyy") ?? "-")</td>
-                                <td>
-                                    @if (p.Status != "Paid")
-                                    {
-                                        <form asp-action="MarkTrainerPaid" method="post" style="display:flex; flex-direction:column; gap:8px; min-width: 150px;">
-                                            <input type="hidden" name="id" value="@p.Id" />
-                                            <input type="number" name="amountPaid" class="form-control" style="padding:4px 8px;font-size:0.85rem;" placeholder="Amount to Pay" value="@p.Amount" required />
-                                            <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.85rem;" required>
-                                                <option value="Cash">Cash</option>
-                                                <option value="Bank Transfer">Bank Transfer</option>
-                                                <option value="bKash">bKash</option>
-                                            </select>
-                                            <button type="submit" class="btn-sm btn-success" data-confirm="Mark this salary as paid?">Mark Paid</button>
-                                        </form>
-                                    }
-                                </td>
-                            </tr>
-                        }
                     }
                 </tbody>
             </table>

@@ -29,12 +29,13 @@
             var dict = ViewBag.PackageDistribution as Dictionary<string, int>;
             if (dict != null && dict.Count > 0)
             {
-                <select class="form-control" style="background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; padding:8px 12px; font-size:0.9rem; cursor:pointer;">
-                    <option value="" disabled selected>View Distribution...</option>
+                <select id="package-filter" class="form-control" style="background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; padding:8px 12px; font-size:0.9rem; cursor:pointer;">
+                    <option value="all" selected>All Packages</option>
                     @foreach (var kvp in dict)
                     {
                         <option value="@kvp.Key">@kvp.Key (@kvp.Value members)</option>
                     }
+                    <option value="None">No Package Assigned</option>
                 </select>
             }
             else
@@ -67,7 +68,7 @@
                 {
                     int daysLeft = m.RemainingDays ?? 0;
                     string daysBadge = daysLeft > 14 ? "badge-success" : daysLeft > 7 ? "badge-warning" : "badge-danger";
-                    <tr>
+                    <tr class="member-row" data-package="@(m.ActivePackageName ?? "None")">
                         <td><span class="badge badge-accent" style="font-family:monospace;letter-spacing:1px">@m.GymId</span></td>
                         <td>
                             <div class="member-name-cell">
@@ -126,3 +127,19 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('package-filter')?.addEventListener('change', function() {
+            var selectedPackage = this.value;
+            var rows = document.querySelectorAll('.member-row');
+            rows.forEach(function(row) {
+                if (selectedPackage === 'all' || row.getAttribute('data-package') === selectedPackage) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

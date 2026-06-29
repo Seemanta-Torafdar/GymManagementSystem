@@ -383,23 +383,7 @@ namespace GymManagement.Controllers
 
         public async Task<IActionResult> Payments(string? search, int? month, int? year)
         {
-            var payments = await _paymentService.GetAllAsync();
-            if (!string.IsNullOrEmpty(search))
-            {
-                search = search.ToLower();
-                payments = payments.Where(p => 
-                    p.MemberName.ToLower().Contains(search) || 
-                    (p.Notes != null && p.Notes.ToLower().Contains(search))
-                ).ToList();
-            }
-            if (month.HasValue)
-            {
-                payments = payments.Where(p => p.PaymentDate?.Month == month.Value || p.DueDate.Month == month.Value).ToList();
-            }
-            if (year.HasValue)
-            {
-                payments = payments.Where(p => p.PaymentDate?.Year == year.Value || p.DueDate.Year == year.Value).ToList();
-            }
+            var payments = await _paymentService.GetFilteredAsync(search, month, year);
             ViewBag.Search = search;
             ViewBag.Month = month;
             ViewBag.Year = year;
@@ -423,27 +407,66 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Payments));
         }
 
-        public async Task<IActionResult> TrainerPayments()
+        [HttpPost]
+        public async Task<IActionResult> RecordMemberPayment(int id, decimal amountPaid, string paymentMethod, string? notes)
         {
-            var payments = await _paymentService.GetAllTrainerPaymentsAsync();
+            await _paymentService.RecordMemberPaymentAsync(id, amountPaid, paymentMethod, notes);
+            TempData["Success"] = "Payment recorded successfully.";
+            return RedirectToAction(nameof(Payments));
+        }
+
+        public async Task<IActionResult> TrainerPayments(int? trainerId, int? month, int? year)
+        {
+            var payments = await _paymentService.GetFilteredTrainerPaymentsAsync(trainerId, month, year);
             ViewBag.Trainers = await _trainerService.GetAllAsync();
+            ViewBag.TrainerId = trainerId;
+            ViewBag.Month = month;
+            ViewBag.Year = year;
             return View(payments);
         }
 
         [HttpPost]
-        public async Task<IActionResult> MarkTrainerPaid(int id, decimal amountPaid, string paymentMethod)
+        public async Task<IActionResult> PayTrainerSalary(int id, decimal amountToPay, string paymentMethod, string? notes)
         {
-            await _paymentService.MarkTrainerPaidAsync(id, amountPaid, paymentMethod);
-            TempData["Success"] = "Trainer payment marked as paid.";
+            await _paymentService.PayTrainerSalaryAsync(id, amountToPay, paymentMethod, notes);
+            TempData["Success"] = "Trainer salary payment recorded.";
             return RedirectToAction(nameof(TrainerPayments));
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTrainerPayment(int trainerId, int month, int year, decimal amount)
+        public async Task<IActionResult> CreateTrainerPayment(int trainerId, int month, int year, decimal totalSalary)
         {
-            await _paymentService.CreateTrainerPaymentAsync(trainerId, month, year, amount);
-            TempData["Success"] = "Trainer payment record created.";
+            await _paymentService.CreateTrainerPaymentAsync(trainerId, month, year, totalSalary);
+            TempData["Success"] = "Trainer salary record created.";
             return RedirectToAction(nameof(TrainerPayments));
+        }
+
+        // Personal Training Sessions
+        public async Task<IActionResult> PersonalTraining(int? trainerId, int? month, int? year)
+        {
+            var sessions = await _paymentService.GetFilteredPTSessionsAsync(trainerId, month, year);
+            ViewBag.Trainers = await _trainerService.GetAllAsync();
+            ViewBag.Members = await _memberService.GetAllAsync();
+            ViewBag.TrainerId = trainerId;
+            ViewBag.Month = month;
+            ViewBag.Year = year;
+            return View(sessions);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePTSession(int trainerId, int memberId, DateTime sessionDate, string timeSlot, decimal charge)
+        {
+            await _paymentService.CreatePTSessionAsync(trainerId, memberId, sessionDate, timeSlot, charge);
+            TempData["Success"] = "Personal training session created.";
+            return RedirectToAction(nameof(PersonalTraining));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PayPTSession(int id, decimal amountPaid, string paymentMethod, string? notes)
+        {
+            await _paymentService.PayPTSessionAsync(id, amountPaid, paymentMethod, notes);
+            TempData["Success"] = "PT session payment recorded.";
+            return RedirectToAction(nameof(PersonalTraining));
         }
 
         // --- Gym Shift CRUD ---
