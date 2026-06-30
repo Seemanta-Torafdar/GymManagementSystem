@@ -57,6 +57,47 @@
             </div>
         }
 
+        @if (Model.PersonalTrainingCharge > 0)
+        {
+            <div style="margin-top:24px;padding:24px;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.03));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius)">
+                <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:#818cf8">
+                    <i class="fas fa-money-bill-wave"></i> Personal Training Fee
+                </h3>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+                    <div style="padding:16px;background:var(--bg-secondary);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border)">
+                        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px">Monthly Charge</div>
+                        <div style="font-size:1.5rem;font-weight:800;color:#818cf8">৳@Model.PersonalTrainingCharge.ToString("N0")</div>
+                    </div>
+                    <div style="padding:16px;background:var(--bg-secondary);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border)">
+                        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px">Paid This Month</div>
+                        <div style="font-size:1.5rem;font-weight:800;color:#4ade80">৳@Model.PersonalTrainingAmountPaid.ToString("N0")</div>
+                    </div>
+                    <div style="padding:16px;background:var(--bg-secondary);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border)">
+                        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px">Due Amount</div>
+                        <div style="font-size:1.5rem;font-weight:800;color:@(Model.PersonalTrainingDue > 0 ? "#f87171" : "#4ade80")">৳@Model.PersonalTrainingDue.ToString("N0")</div>
+                    </div>
+                </div>
+                @if (Model.PersonalTrainingPaymentStatus != null)
+                {
+                    var ptBadge = Model.PersonalTrainingPaymentStatus == "Paid" ? "badge-success"
+                        : Model.PersonalTrainingPaymentStatus == "Partial Paid" ? "badge-warning"
+                        : "badge-danger";
+                    <div style="text-align:center">
+                        <span class="badge @ptBadge" style="font-size:0.85rem;padding:8px 20px">
+                            <i class="fas @(Model.PersonalTrainingPaymentStatus == "Paid" ? "fa-check-circle" : "fa-exclamation-circle")"></i>
+                            @Model.PersonalTrainingPaymentStatus
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin:0">
+                        <i class="fas fa-info-circle"></i> No payment record for this month yet. Please pay at the front desk.
+                    </p>
+                }
+            </div>
+        }
+
         <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border)">
             <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--text-muted)">
                 <i class="fas fa-info-circle"></i> What Your Trainer Can Do

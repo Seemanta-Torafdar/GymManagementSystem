@@ -14,6 +14,7 @@ namespace DAL.Repositories
             await _context.Trainers.Include(t => t.User)
                 .Include(t => t.TrainerAssignments)
                 .Include(t => t.TrainerReviews)
+                .Include(t => t.PersonalTrainingSessions)
                 .ToListAsync();
 
         public async Task<Trainer?> GetByIdAsync(int id) =>
@@ -23,6 +24,7 @@ namespace DAL.Repositories
                 .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.YogaSchedule)
                 .Include(t => t.TrainerAssignments).ThenInclude(ta => ta.Member).ThenInclude(m => m.MembershipPurchases).ThenInclude(mp => mp.CardioSchedule)
                 .Include(t => t.TrainerReviews).ThenInclude(r => r.Member).ThenInclude(m => m.User)
+                .Include(t => t.PersonalTrainingSessions)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
         public async Task<Trainer?> GetByUserIdAsync(string userId) =>
@@ -59,6 +61,11 @@ namespace DAL.Repositories
 
         public async Task<TrainerAssignment?> GetAssignmentByIdAsync(int id) =>
             await _context.TrainerAssignments.FindAsync(id);
+
+        public async Task<TrainerAssignment?> GetActiveAssignmentByMemberIdAsync(int memberId) =>
+            await _context.TrainerAssignments
+                .Include(ta => ta.Trainer).ThenInclude(t => t.User)
+                .FirstOrDefaultAsync(ta => ta.MemberId == memberId && ta.IsActive);
 
         public async Task UpdateTrainerAssignmentAsync(TrainerAssignment assignment)
         {

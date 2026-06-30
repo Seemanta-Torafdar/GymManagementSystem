@@ -47,6 +47,14 @@ else
                             <span style="font-size:0.78rem;color:var(--text-muted)">
                                 <i class="fas fa-calendar-check"></i> Allocated since @a.AssignedDate.ToString("MMM dd, yyyy")
                             </span>
+                            @if (a.PersonalTrainingCharge > 0)
+                            {
+                                <div style="margin-top:6px">
+                                    <span style="font-size:0.8rem;padding:4px 10px;background:rgba(99,102,241,0.15);color:#818cf8;border-radius:var(--radius-sm);font-weight:700">
+                                        <i class="fas fa-money-bill"></i> ৳@a.PersonalTrainingCharge.ToString("N0")/month
+                                    </span>
+                                </div>
+                            }
                         </div>
                     </div>
                     <a asp-action="StudentDetails" asp-route-id="@a.MemberId" class="btn-sm-accent">

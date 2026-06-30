@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BLL.DTOs.TrainerPaymentDTO>
+@model IEnumerable<BLL.DTOs.TrainerPaymentDTO>
 @{
     ViewData["Title"] = "Trainer Salaries";
     Layout = "_AdminLayout";
@@ -12,61 +12,28 @@
     </div>
 </div>
 
-<div class="grid-2" style="grid-template-columns:300px 1fr;align-items:start;">
-
-    <!-- Generate Salary Record -->
-    <div class="card">
-        <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-plus"></i> Generate Salary</h3>
-        <form asp-action="CreateTrainerPayment" method="post">
-            @Html.AntiForgeryToken()
-            <div class="form-group">
-                <label class="form-label">Trainer</label>
-                <select name="trainerId" class="form-control" required>
-                    <option value="">-- Select Trainer --</option>
-                    @foreach (var t in trainers) { <option value="@t.Id">@t.FullName (Salary: ৳@t.MonthlySalary.ToString("N0"))</option> }
-                </select>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Month</label>
-                    <select name="month" class="form-control" required>
-                        @for (int m = 1; m <= 12; m++) {
-                            <option value="@m" selected="@(m == DateTime.Now.Month ? "selected" : null)">
-                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
-                            </option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Year</label>
-                    <input type="number" name="year" class="form-control" value="@DateTime.Now.Year" required />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Total Salary (৳)</label>
-                <input type="number" name="totalSalary" class="form-control" step="0.01" required placeholder="e.g. 50000" />
-            </div>
-            <button type="submit" class="btn-primary" style="width:100%;margin-top:10px">Create Record</button>
-        </form>
-    </div>
-
     <!-- Salary Table -->
     <div class="card" style="padding:0">
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
             <h3 style="font-size:1.1rem;font-weight:700;margin:0">Salary Records (@Model.Count())</h3>
             <form method="get" action="/Admin/TrainerPayments" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <select name="trainerId" class="form-control" style="width:160px">
+                <input type="text" name="searchTrainer" value="@ViewBag.SearchTrainer" placeholder="Search trainer..." class="form-control" style="width:140px" />
+                <select name="trainerId" class="form-control" style="width:130px">
                     <option value="">All Trainers</option>
                     @foreach (var t in trainers) { <option value="@t.Id" selected="@(ViewBag.TrainerId == t.Id ? "selected" : null)">@t.FullName</option> }
                 </select>
-                <select name="month" class="form-control" style="width:120px">
+                <input type="date" name="date" value="@ViewBag.Date" class="form-control" style="width:130px" />
+                <select name="month" class="form-control" style="width:110px">
                     <option value="">All Months</option>
                     @for (int m = 1; m <= 12; m++) {
                         <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
                     }
                 </select>
                 <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:85px" />
-                <button type="submit" class="btn-primary" style="padding:8px 14px"><i class="fas fa-filter"></i></button>
+                <button type="submit" class="btn-primary" style="padding:8px 12px"><i class="fas fa-filter"></i></button>
+                @if(ViewBag.SearchTrainer != null || ViewBag.TrainerId != null || ViewBag.Month != null || ViewBag.Year != null || ViewBag.Date != null){
+                    <a asp-action="TrainerPayments" class="btn-secondary" style="padding:8px 12px">Clear</a>
+                }
             </form>
         </div>
         <div style="padding:20px;overflow-x:auto">
@@ -121,4 +88,4 @@
             </table>
         </div>
     </div>
-</div>
+

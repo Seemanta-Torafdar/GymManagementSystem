@@ -156,7 +156,12 @@ namespace GymManagement.Controllers
         {
             var trainer = await _trainerService.GetByIdAsync(id);
             if (trainer == null) return NotFound();
-            return View(new TrainerEditDTO { Id = trainer.Id, Specialization = trainer.Specialization, Experience = trainer.Experience, MonthlySalary = trainer.MonthlySalary, Bio = trainer.Bio, Certifications = trainer.Certifications, IsAvailable = trainer.IsAvailable });
+            return View(new TrainerEditDTO { 
+                Id = trainer.Id, Email = trainer.Email, Specialization = trainer.Specialization, Experience = trainer.Experience, 
+                MonthlySalary = trainer.MonthlySalary, Bio = trainer.Bio, Certifications = trainer.Certifications, 
+                IsAvailable = trainer.IsAvailable, Phone = trainer.Phone, DateOfBirth = trainer.DateOfBirth,
+                TrainingCharge = trainer.TrainingCharge, TrainingTime = trainer.TrainingTime
+            });
         }
 
         [HttpPost]
@@ -230,20 +235,21 @@ namespace GymManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignTrainer(int memberId, int trainerId, string? workoutPlan, string? notes)
+        public async Task<IActionResult> AssignTrainer(int memberId, int trainerId, string? workoutPlan, string? notes, decimal personalTrainingCharge)
         {
             // First, remove any existing trainer assignment for this member
             await _trainerService.RemoveTrainerAssignmentAsync(memberId);
             
-            // Then, assign the new trainer
-            await _trainerService.AssignMemberAsync(trainerId, memberId, workoutPlan, notes);
+            // Then, assign the new trainer with the per-student PT charge
+            await _trainerService.AssignMemberAsync(trainerId, memberId, workoutPlan, notes, personalTrainingCharge);
             
-            // Generate the first month's payment for the training charge
-            var trainer = await _trainerService.GetByIdAsync(trainerId);
-            if (trainer != null && trainer.TrainingCharge > 0)
+            // Generate the first month's PT fee payment if charge > 0
+            if (personalTrainingCharge > 0)
             {
-                string paymentNotes = $"Monthly Personal Training Fee - {trainer.FullName}";
-                await _paymentService.CreatePaymentAsync(memberId, trainer.TrainingCharge, DateTime.Today.AddDays(30), null, paymentNotes);
+                var trainer = await _trainerService.GetByIdAsync(trainerId);
+                string trainerName = trainer?.FullName ?? "Personal Trainer";
+                string paymentNotes = $"PT Fee - {trainerName} ({DateTime.Now:MMMM yyyy})";
+                await _paymentService.CreatePaymentAsync(memberId, personalTrainingCharge, DateTime.Today.AddDays(30), null, paymentNotes);
             }
 
             TempData["Success"] = "Trainer assigned successfully!";
@@ -381,12 +387,13 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Equipment));
         }
 
-        public async Task<IActionResult> Payments(string? search, int? month, int? year)
+        public async Task<IActionResult> Payments(string? search, int? month, int? year, DateTime? date)
         {
-            var payments = await _paymentService.GetFilteredAsync(search, month, year);
+            var payments = await _paymentService.GetFilteredAsync(search, month, year, date);
             ViewBag.Search = search;
             ViewBag.Month = month;
             ViewBag.Year = year;
+            ViewBag.Date = date?.ToString("yyyy-MM-dd");
             ViewBag.MonthlyRevenue = await _paymentService.GetMonthlyRevenueAsync(DateTime.Now.Month, DateTime.Now.Year);
             return View(payments);
         }
@@ -415,13 +422,20 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Payments));
         }
 
-        public async Task<IActionResult> TrainerPayments(int? trainerId, int? month, int? year)
+        public async Task<IActionResult> TrainerPayments(string? searchTrainer, int? trainerId, int? month, int? year, DateTime? date)
         {
-            var payments = await _paymentService.GetFilteredTrainerPaymentsAsync(trainerId, month, year);
+            int targetMonth = month ?? DateTime.Now.Month;
+            int targetYear = year ?? DateTime.Now.Year;
+            
+            await _paymentService.EnsureTrainerPaymentsAsync(targetMonth, targetYear);
+            
+            var payments = await _paymentService.GetFilteredTrainerPaymentsAsync(searchTrainer, trainerId, targetMonth, targetYear, date);
             ViewBag.Trainers = await _trainerService.GetAllAsync();
+            ViewBag.SearchTrainer = searchTrainer;
             ViewBag.TrainerId = trainerId;
-            ViewBag.Month = month;
-            ViewBag.Year = year;
+            ViewBag.Month = targetMonth;
+            ViewBag.Year = targetYear;
+            ViewBag.Date = date?.ToString("yyyy-MM-dd");
             return View(payments);
         }
 
@@ -442,14 +456,17 @@ namespace GymManagement.Controllers
         }
 
         // Personal Training Sessions
-        public async Task<IActionResult> PersonalTraining(int? trainerId, int? month, int? year)
+        public async Task<IActionResult> PersonalTraining(int? trainerId, int? month, int? year, DateTime? date, string? status, string? paymentMethod)
         {
-            var sessions = await _paymentService.GetFilteredPTSessionsAsync(trainerId, month, year);
+            var sessions = await _paymentService.GetFilteredPTSessionsAsync(trainerId, month, year, date, status, paymentMethod);
             ViewBag.Trainers = await _trainerService.GetAllAsync();
             ViewBag.Members = await _memberService.GetAllAsync();
             ViewBag.TrainerId = trainerId;
             ViewBag.Month = month;
             ViewBag.Year = year;
+            ViewBag.Date = date?.ToString("yyyy-MM-dd");
+            ViewBag.Status = status;
+            ViewBag.PaymentMethod = paymentMethod;
             return View(sessions);
         }
 

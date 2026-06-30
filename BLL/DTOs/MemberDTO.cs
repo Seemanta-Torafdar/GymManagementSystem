@@ -34,6 +34,13 @@ namespace BLL.DTOs
         public string? CardioTimeRange { get; set; }
         public int? AssignedTrainerId { get; set; }
         public string? AssignedTrainerName { get; set; }
+        public string? AssignedTrainerEmail { get; set; }
+
+        // Personal Training Payment Info
+        public decimal PersonalTrainingCharge { get; set; } // Monthly PT fee for this member
+        public decimal PersonalTrainingAmountPaid { get; set; } // How much paid this month
+        public decimal PersonalTrainingDue => PersonalTrainingCharge - PersonalTrainingAmountPaid;
+        public string? PersonalTrainingPaymentStatus { get; set; } // Paid | Partial Paid | Unpaid | null
     }
 
     public class MemberCreateDTO

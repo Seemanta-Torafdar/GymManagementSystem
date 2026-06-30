@@ -35,16 +35,22 @@
 
             <div class="form-group">
                 <label class="form-label">Select Trainer</label>
-                <select name="trainerId" class="form-control" required>
+                <select name="trainerId" class="form-control" required id="trainerSelect">
                     <option value="">-- Choose a Trainer --</option>
                     @if(trainers != null)
                     {
                         foreach (var trainer in trainers)
                         {
-                            <option value="@trainer.Id">@trainer.FullName - @trainer.Specialization (@trainer.AssignedMembersCount students)</option>
+                            <option value="@trainer.Id" data-charge="@trainer.TrainingCharge">@trainer.FullName - @trainer.Specialization (@trainer.AssignedMembersCount students) — Default: ৳@trainer.TrainingCharge.ToString("N0")</option>
                         }
                     }
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Personal Training Charge (Monthly) <span style="color:var(--accent);font-weight:600">৳</span></label>
+                <input type="number" name="personalTrainingCharge" id="ptCharge" class="form-control" min="0" step="100" value="0" required />
+                <div class="form-hint">Monthly fee for this student. Defaults to trainer's rate but you can customize it per student.</div>
             </div>
 
             <div class="form-group">
@@ -64,3 +70,12 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('trainerSelect').addEventListener('change', function () {
+        var selected = this.options[this.selectedIndex];
+        var charge = selected.getAttribute('data-charge') || '0';
+        document.getElementById('ptCharge').value = charge;
+    });
+</script>
+

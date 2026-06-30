@@ -8,14 +8,15 @@ namespace BLL.Services
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepo _repo;
-        public PaymentService(IPaymentRepo repo) { _repo = repo; }
+        private readonly ITrainerRepo _trainerRepo;
+        public PaymentService(IPaymentRepo repo, ITrainerRepo trainerRepo) { _repo = repo; _trainerRepo = trainerRepo; }
 
         // ── Member Payments ──────────────────────────────────────────────────────
         public async Task<IEnumerable<PaymentDTO>> GetAllAsync() =>
             (await _repo.GetAllAsync()).Select(MapToDTO);
 
-        public async Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year) =>
-            (await _repo.GetFilteredAsync(search, month, year)).Select(MapToDTO);
+        public async Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null) =>
+            (await _repo.GetFilteredAsync(search, month, year, date)).Select(MapToDTO);
 
         public async Task<IEnumerable<PaymentDTO>> GetByMemberIdAsync(int memberId) =>
             (await _repo.GetByMemberIdAsync(memberId)).Select(MapToDTO);
@@ -69,8 +70,27 @@ namespace BLL.Services
         public async Task<IEnumerable<TrainerPaymentDTO>> GetAllTrainerPaymentsAsync() =>
             (await _repo.GetAllTrainerPaymentsAsync()).Select(MapTrainerPaymentToDTO);
 
-        public async Task<IEnumerable<TrainerPaymentDTO>> GetFilteredTrainerPaymentsAsync(int? trainerId, int? month, int? year) =>
-            (await _repo.GetFilteredTrainerPaymentsAsync(trainerId, month, year)).Select(MapTrainerPaymentToDTO);
+        public async Task<IEnumerable<TrainerPaymentDTO>> GetFilteredTrainerPaymentsAsync(string? search, int? trainerId, int? month, int? year, DateTime? date = null) =>
+            (await _repo.GetFilteredTrainerPaymentsAsync(search, trainerId, month, year, date)).Select(MapTrainerPaymentToDTO);
+            
+        public async Task EnsureTrainerPaymentsAsync(int month, int year)
+        {
+            var trainers = await _trainerRepo.GetAllAsync();
+            var existingPayments = await _repo.GetFilteredTrainerPaymentsAsync(null, null, month, year);
+            var existingTrainerIds = existingPayments.Select(p => p.TrainerId).ToHashSet();
+            
+            foreach(var trainer in trainers)
+            {
+                if(!existingTrainerIds.Contains(trainer.Id))
+                {
+                    await _repo.AddTrainerPaymentAsync(new TrainerPayment
+                    { 
+                        TrainerId = trainer.Id, Month = month, Year = year, 
+                        TotalSalary = trainer.MonthlySalary, AmountPaid = 0, PaymentStatus = "Unpaid" 
+                    });
+                }
+            }
+        }
 
         public async Task<IEnumerable<TrainerPaymentDTO>> GetTrainerSalaryHistoryAsync(int trainerId) =>
             (await _repo.GetTrainerPaymentsByTrainerIdAsync(trainerId)).Select(MapTrainerPaymentToDTO);
@@ -101,8 +121,8 @@ namespace BLL.Services
         public async Task<IEnumerable<PersonalTrainingSessionDTO>> GetAllPTSessionsAsync() =>
             (await _repo.GetAllPTSessionsAsync()).Select(MapPTSessionToDTO);
 
-        public async Task<IEnumerable<PersonalTrainingSessionDTO>> GetFilteredPTSessionsAsync(int? trainerId, int? month, int? year) =>
-            (await _repo.GetFilteredPTSessionsAsync(trainerId, month, year)).Select(MapPTSessionToDTO);
+        public async Task<IEnumerable<PersonalTrainingSessionDTO>> GetFilteredPTSessionsAsync(int? trainerId, int? month, int? year, DateTime? date = null, string? status = null, string? paymentMethod = null) =>
+            (await _repo.GetFilteredPTSessionsAsync(trainerId, month, year, date, status, paymentMethod)).Select(MapPTSessionToDTO);
 
         public async Task<bool> CreatePTSessionAsync(int trainerId, int memberId, DateTime date, string timeSlot, decimal charge)
         {
@@ -129,6 +149,13 @@ namespace BLL.Services
             if (notes != null) s.Notes = notes;
             await _repo.UpdatePTSessionAsync(s);
             return true;
+        }
+
+        // ── Personal Training Fee Status (for Trainer Dashboard) ──────────────────
+        public async Task<IEnumerable<PaymentDTO>> GetStudentPaymentStatusAsync(int trainerId, int? month, int? year)
+        {
+            var payments = await _repo.GetPTFeePaymentsForTrainerStudentsAsync(trainerId, month, year);
+            return payments.Select(MapToDTO);
         }
 
         // ── Mapping ──────────────────────────────────────────────────────────────

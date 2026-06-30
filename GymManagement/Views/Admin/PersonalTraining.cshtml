@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BLL.DTOs.PersonalTrainingSessionDTO>
+@model IEnumerable<BLL.DTOs.PersonalTrainingSessionDTO>
 @{
     ViewData["Title"] = "Personal Training";
     Layout = "_AdminLayout";
@@ -31,16 +31,16 @@
             @Html.AntiForgeryToken()
             <div class="form-group">
                 <label class="form-label">Trainer</label>
-                <select name="trainerId" class="form-control" required>
+                <select name="trainerId" id="trainerSelect" class="form-control" required>
                     <option value="">-- Select Trainer --</option>
                     @foreach (var t in trainers) { <option value="@t.Id">@t.FullName</option> }
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Member</label>
-                <select name="memberId" class="form-control" required>
+                <select name="memberId" id="memberSelect" class="form-control" required>
                     <option value="">-- Select Member --</option>
-                    @foreach (var m in members) { <option value="@m.Id">@m.FullName</option> }
+                    @foreach (var m in members) { <option value="@m.Id" data-trainer-id="@m.AssignedTrainerId">@m.FullName</option> }
                 </select>
             </div>
             <div class="form-group">
@@ -64,18 +64,34 @@
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
             <h3 style="font-size:1.1rem;font-weight:700;margin:0">Sessions (@Model.Count())</h3>
             <form method="get" action="/Admin/PersonalTraining" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <select name="trainerId" class="form-control" style="width:150px">
+                <select name="trainerId" class="form-control" style="width:140px">
                     <option value="">All Trainers</option>
                     @foreach (var t in trainers) { <option value="@t.Id" selected="@(ViewBag.TrainerId == t.Id ? "selected" : null)">@t.FullName</option> }
                 </select>
-                <select name="month" class="form-control" style="width:120px">
+                <input type="date" name="date" value="@ViewBag.Date" class="form-control" style="width:130px" />
+                <select name="month" class="form-control" style="width:110px">
                     <option value="">All Months</option>
                     @for (int m = 1; m <= 12; m++) {
                         <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
                     }
                 </select>
-                <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:85px" />
-                <button type="submit" class="btn-primary" style="padding:8px 14px"><i class="fas fa-filter"></i></button>
+                <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:75px" />
+                <select name="status" class="form-control" style="width:105px">
+                    <option value="">Status...</option>
+                    <option value="Paid" selected="@(ViewBag.Status == "Paid" ? "selected" : null)">Paid</option>
+                    <option value="Partial Paid" selected="@(ViewBag.Status == "Partial Paid" ? "selected" : null)">Partial</option>
+                    <option value="Unpaid" selected="@(ViewBag.Status == "Unpaid" ? "selected" : null)">Unpaid</option>
+                </select>
+                <select name="paymentMethod" class="form-control" style="width:125px">
+                    <option value="">Method...</option>
+                    <option value="Cash" selected="@(ViewBag.PaymentMethod == "Cash" ? "selected" : null)">Cash</option>
+                    <option value="Bank Transfer" selected="@(ViewBag.PaymentMethod == "Bank Transfer" ? "selected" : null)">Bank Transfer</option>
+                    <option value="bKash" selected="@(ViewBag.PaymentMethod == "bKash" ? "selected" : null)">bKash</option>
+                </select>
+                <button type="submit" class="btn-primary" style="padding:8px 12px"><i class="fas fa-filter"></i></button>
+                @if(ViewBag.TrainerId != null || ViewBag.Month != null || ViewBag.Year != null || ViewBag.Date != null || ViewBag.Status != null || ViewBag.PaymentMethod != null){
+                    <a asp-action="PersonalTraining" class="btn-secondary" style="padding:8px 12px">Clear</a>
+                }
             </form>
         </div>
         <div style="padding:20px;overflow-x:auto">
@@ -125,3 +141,32 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var trainerSelect = document.getElementById("trainerSelect");
+            var memberSelect = document.getElementById("memberSelect");
+            if(trainerSelect && memberSelect) {
+                var allOptions = Array.from(memberSelect.options).slice(1); // Skip the placeholder
+                
+                trainerSelect.addEventListener("change", function() {
+                    var selectedTrainerId = this.value;
+                    
+                    // Reset member dropdown
+                    memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
+                    
+                    // Filter options
+                    allOptions.forEach(function(opt) {
+                        if (!selectedTrainerId || opt.getAttribute("data-trainer-id") === selectedTrainerId) {
+                            memberSelect.appendChild(opt.cloneNode(true));
+                        }
+                    });
+                });
+                
+                // Trigger once to setup initial state
+                trainerSelect.dispatchEvent(new Event("change"));
+            }
+        });
+    </script>
+}

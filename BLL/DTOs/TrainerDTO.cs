@@ -24,6 +24,7 @@ namespace BLL.DTOs
         public string Phone { get; set; } = string.Empty;
         public string? TrainingTime { get; set; }
         public int AssignedMembersCount { get; set; }
+        public int PTMembersCount { get; set; }
         public double AverageRating { get; set; }
         public int TotalReviews { get; set; }
         public List<TrainerAssignmentDTO> Assignments { get; set; } = new();
@@ -71,6 +72,7 @@ namespace BLL.DTOs
     public class TrainerEditDTO
     {
         public int Id { get; set; }
+        public string Email { get; set; } = string.Empty;
         public string Specialization { get; set; } = string.Empty;
         public int Experience { get; set; }
         public decimal MonthlySalary { get; set; }
@@ -81,6 +83,24 @@ namespace BLL.DTOs
         public string? ProfilePhoto { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Phone { get; set; } = string.Empty;
+        public string? TrainingTime { get; set; }
+    }
+
+    public class TrainerProfileEditDTO
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string FullName => $"{FirstName} {LastName}".Trim();
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Specialization { get; set; } = string.Empty;
+        public int Experience { get; set; }
+        public string? Bio { get; set; }
+        public string? Certifications { get; set; }
+        public bool IsAvailable { get; set; }
+        public string? ProfilePhoto { get; set; }
+        public DateTime DateOfBirth { get; set; }
         public string? TrainingTime { get; set; }
     }
 
@@ -98,6 +118,7 @@ namespace BLL.DTOs
         public string? MemberWorkoutTime { get; set; }
         public string? WorkoutPlan { get; set; }
         public string? TrainingNotes { get; set; }
+        public decimal PersonalTrainingCharge { get; set; }
         public DateTime AssignedDate { get; set; }
         public bool IsActive { get; set; }
     }

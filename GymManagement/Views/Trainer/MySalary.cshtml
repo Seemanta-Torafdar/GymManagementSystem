@@ -1,0 +1,199 @@
+@model IEnumerable<BLL.DTOs.TrainerPaymentDTO>
+@{
+    ViewData["Title"] = "My Salary";
+    Layout = "_TrainerLayout";
+    
+    var currentMonth = ViewBag.Month as int?;
+    var currentYear = ViewBag.Year as int? ?? DateTime.Now.Year;
+    
+    var months = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+
+    var totalEarned = Model.Sum(p => p.AmountPaid);
+    var totalPending = Model.Sum(p => p.TotalSalary - p.AmountPaid);
+    var totalExpected = Model.Sum(p => p.TotalSalary);
+}
+
+<style>
+    /* Modern Dashboard Animations & Styles */
+    .salary-card {
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .salary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    @@keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .progress-bar-fill {
+        transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .summary-widget {
+        background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .summary-widget-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="page-header" style="margin-bottom:24px">
+    <div class="page-header-left">
+        <h1><i class="fas fa-money-check-alt" style="color:var(--accent)"></i> My Salary</h1>
+        <p>Your comprehensive earnings dashboard and payment history.</p>
+    </div>
+</div>
+
+<!-- Summary Widgets -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:24px;margin-bottom:32px">
+    <div class="summary-widget" style="animation: fadeUp 0.4s both;">
+        <div class="summary-widget-icon" style="background:rgba(46, 204, 113, 0.1);color:var(--success)">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <span style="color:var(--text-muted);font-size:0.9rem;font-weight:500;text-transform:uppercase;letter-spacing:1px">Total Earned</span>
+        <span style="font-size:2rem;font-weight:700;color:var(--text-color)">$@totalEarned.ToString("0.00")</span>
+    </div>
+    <div class="summary-widget" style="animation: fadeUp 0.5s both;">
+        <div class="summary-widget-icon" style="background:rgba(231, 76, 60, 0.1);color:var(--danger)">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <span style="color:var(--text-muted);font-size:0.9rem;font-weight:500;text-transform:uppercase;letter-spacing:1px">Pending Balance</span>
+        <span style="font-size:2rem;font-weight:700;color:var(--text-color)">$@totalPending.ToString("0.00")</span>
+    </div>
+    <div class="summary-widget" style="animation: fadeUp 0.6s both;">
+        <div class="summary-widget-icon" style="background:rgba(52, 152, 219, 0.1);color:var(--accent)">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <span style="color:var(--text-muted);font-size:0.9rem;font-weight:500;text-transform:uppercase;letter-spacing:1px">Total Expected</span>
+        <span style="font-size:2rem;font-weight:700;color:var(--text-color)">$@totalExpected.ToString("0.00")</span>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 32px; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;">
+    <form method="get" class="search-form" style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;min-width:200px">
+            <label class="form-label">Month</label>
+            <select name="month" class="form-control" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1)">
+                <option value="">All Months</option>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <option value="@i" selected="@(i == currentMonth ? "selected" : null)">@months[i - 1]</option>
+                }
+            </select>
+        </div>
+        <div class="form-group" style="flex:1;min-width:150px">
+            <label class="form-label">Year</label>
+            <select name="year" class="form-control" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1)">
+                @for (int i = DateTime.Now.Year - 2; i <= DateTime.Now.Year + 1; i++)
+                {
+                    <option value="@i" selected="@(i == currentYear ? "selected" : null)">@i</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn-primary" style="height:45px;padding:0 24px;border-radius:8px"><i class="fas fa-filter"></i> Apply Filter</button>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card" style="text-align:center;padding:60px 20px;color:var(--text-muted);border: 1px dashed rgba(255,255,255,0.2);background:transparent">
+        <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin:0 auto 24px auto">
+            <i class="fas fa-folder-open" style="font-size:2rem;color:rgba(255,255,255,0.3)"></i>
+        </div>
+        <h3 style="margin-bottom:8px">No Salary Records Found</h3>
+        <p style="margin:0">We couldn't find any payment records matching your filter criteria.</p>
+    </div>
+}
+else
+{
+    <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:24px">
+    @{ int delay = 1; }
+    @foreach (var payment in Model)
+    {
+        var percentPaid = payment.TotalSalary > 0 ? (payment.AmountPaid / payment.TotalSalary) * 100 : 0;
+        var progressColor = payment.PaymentStatus == "Paid" ? "var(--success)" : 
+                            payment.PaymentStatus == "Partial Paid" ? "var(--warning)" : "var(--danger)";
+        var statusBg = payment.PaymentStatus == "Paid" ? "rgba(46, 204, 113, 0.15)" : 
+                       payment.PaymentStatus == "Partial Paid" ? "rgba(243, 156, 18, 0.15)" : "rgba(231, 76, 60, 0.15)";
+        var statusColor = payment.PaymentStatus == "Paid" ? "var(--success)" : 
+                          payment.PaymentStatus == "Partial Paid" ? "var(--warning)" : "var(--danger)";
+
+        <div class="salary-card" style="animation-delay: @(delay * 0.1)s">
+            <!-- Header -->
+            <div style="background:rgba(0,0,0,0.2);padding:20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="margin:0;font-size:1.1rem;display:flex;align-items:center;gap:12px;font-weight:600">
+                    <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(52,152,219,0.1);color:var(--accent)">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    @months[payment.Month - 1] @payment.Year
+                </h3>
+                <span style="background:@statusBg;color:@statusColor;font-weight:600;padding:6px 14px;border-radius:20px;font-size:0.85rem;letter-spacing:0.5px">
+                    @payment.PaymentStatus
+                </span>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:24px 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                        <span style="color:var(--text-muted);font-weight:500;font-size:0.9rem">Total Salary</span>
+                        <span style="font-size:1.75rem;font-weight:800;color:var(--text-color);line-height:1">$@payment.TotalSalary.ToString("0.00")</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div style="margin-bottom:24px;padding:16px;background:rgba(0,0,0,0.15);border-radius:12px">
+                    <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:10px">
+                        <span style="font-weight:700;color:var(--text-color)">@percentPaid.ToString("0")% Paid</span>
+                        <span style="color:var(--text-muted);font-family:monospace;font-size:0.9rem">$@payment.AmountPaid.ToString("0.00") / $@payment.TotalSalary.ToString("0.00")</span>
+                    </div>
+                    <div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden">
+                        <div class="progress-bar-fill" style="height:100%;width:@percentPaid%;background:@progressColor;border-radius:4px;"></div>
+                    </div>
+                </div>
+
+                <!-- Footer details -->
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:0.95rem">
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:12px">
+                        <span style="color:var(--text-muted);display:flex;align-items:center;gap:8px">
+                            <i class="fas fa-wallet" style="opacity:0.7"></i> Payment Method
+                        </span>
+                        <strong style="color:var(--text-color)">@(string.IsNullOrEmpty(payment.PaymentMethod) ? "N/A" : payment.PaymentMethod)</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="color:var(--text-muted);display:flex;align-items:center;gap:8px">
+                            <i class="fas fa-clock" style="opacity:0.7"></i> Last Paid Date
+                        </span>
+                        <strong style="color:var(--text-color)">@(payment.LastPaidDate?.ToString("MMM dd, yyyy") ?? "N/A")</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        delay++;
+    }
+    </div>
+}

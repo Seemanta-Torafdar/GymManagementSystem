@@ -10,12 +10,14 @@ namespace BLL.Services
     {
         private readonly ITrainerRepo _trainerRepo;
         private readonly IAdminRepo _adminRepo;
+        private readonly IPaymentRepo _paymentRepo;
         private readonly UserManager<User> _userManager;
 
-        public TrainerService(ITrainerRepo trainerRepo, IAdminRepo adminRepo, UserManager<User> userManager)
+        public TrainerService(ITrainerRepo trainerRepo, IAdminRepo adminRepo, IPaymentRepo paymentRepo, UserManager<User> userManager)
         {
             _trainerRepo = trainerRepo;
             _adminRepo = adminRepo;
+            _paymentRepo = paymentRepo;
             _userManager = userManager;
         }
 
@@ -91,23 +93,109 @@ namespace BLL.Services
             if (trainer == null) return false;
             trainer.Specialization = dto.Specialization;
             trainer.Experience = dto.Experience;
+            bool salaryChanged = trainer.MonthlySalary != dto.MonthlySalary;
             trainer.MonthlySalary = dto.MonthlySalary;
             trainer.TrainingCharge = dto.TrainingCharge;
             trainer.Bio = dto.Bio;
             trainer.Certifications = dto.Certifications;
             trainer.IsAvailable = dto.IsAvailable;
-            trainer.DateOfBirth = dto.DateOfBirth;
-            trainer.Phone = dto.Phone;
+            trainer.DateOfBirth = dto.DateOfBirth == default ? trainer.DateOfBirth : dto.DateOfBirth;
+            trainer.Phone = dto.Phone ?? trainer.Phone ?? string.Empty;
             trainer.TrainingTime = dto.TrainingTime;
-            if (!string.IsNullOrEmpty(dto.ProfilePhoto))
+            var user = await _userManager.FindByIdAsync(trainer.UserId);
+            if (user != null)
             {
-                var user = await _userManager.FindByIdAsync(trainer.UserId);
-                if (user != null)
+                bool userUpdated = false;
+                if (!string.IsNullOrEmpty(dto.ProfilePhoto))
                 {
                     user.ProfilePhoto = dto.ProfilePhoto;
+                    userUpdated = true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(dto.Email) && user.Email != dto.Email)
+                {
+                    user.Email = dto.Email;
+                    user.UserName = dto.Email; // Keep UserName and Email in sync
+                    userUpdated = true;
+                }
+                
+                if (userUpdated)
+                {
                     await _userManager.UpdateAsync(user);
                 }
             }
+            await _trainerRepo.UpdateAsync(trainer);
+
+            if (salaryChanged)
+            {
+                var payments = await _paymentRepo.GetTrainerPaymentsByTrainerIdAsync(trainer.Id);
+                var currentMonth = DateTime.Now.Month;
+                var currentYear = DateTime.Now.Year;
+                var currentPayment = payments.FirstOrDefault(p => p.Month == currentMonth && p.Year == currentYear);
+                
+                if (currentPayment != null && currentPayment.TotalSalary != dto.MonthlySalary)
+                {
+                    currentPayment.TotalSalary = dto.MonthlySalary;
+                    currentPayment.PaymentStatus = currentPayment.AmountPaid >= currentPayment.TotalSalary ? "Paid"
+                                                 : currentPayment.AmountPaid > 0 ? "Partial Paid"
+                                                 : "Unpaid";
+                    await _paymentRepo.UpdateTrainerPaymentAsync(currentPayment);
+                }
+            }
+            
+            return true;
+        }
+
+        public async Task<bool> UpdateProfileAsync(TrainerProfileEditDTO dto)
+        {
+            var trainer = await _trainerRepo.GetByIdAsync(dto.Id);
+            if (trainer == null) return false;
+            
+            trainer.Specialization = dto.Specialization;
+            trainer.Experience = dto.Experience;
+            trainer.Bio = dto.Bio;
+            trainer.Certifications = dto.Certifications;
+            trainer.IsAvailable = dto.IsAvailable;
+            trainer.DateOfBirth = dto.DateOfBirth == default ? trainer.DateOfBirth : dto.DateOfBirth;
+            trainer.Phone = dto.Phone ?? trainer.Phone ?? string.Empty;
+            trainer.TrainingTime = dto.TrainingTime;
+            
+            var user = await _userManager.FindByIdAsync(trainer.UserId);
+            if (user != null)
+            {
+                bool userUpdated = false;
+                
+                if (!string.IsNullOrWhiteSpace(dto.FirstName) && user.FirstName != dto.FirstName)
+                {
+                    user.FirstName = dto.FirstName;
+                    userUpdated = true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(dto.LastName) && user.LastName != dto.LastName)
+                {
+                    user.LastName = dto.LastName;
+                    userUpdated = true;
+                }
+                
+                if (!string.IsNullOrEmpty(dto.ProfilePhoto))
+                {
+                    user.ProfilePhoto = dto.ProfilePhoto;
+                    userUpdated = true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(dto.Email) && user.Email != dto.Email)
+                {
+                    user.Email = dto.Email;
+                    user.UserName = dto.Email;
+                    userUpdated = true;
+                }
+                
+                if (userUpdated)
+                {
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+            
             await _trainerRepo.UpdateAsync(trainer);
             return true;
         }
@@ -131,7 +219,7 @@ namespace BLL.Services
             return true;
         }
 
-        public async Task<bool> AssignMemberAsync(int trainerId, int memberId, string? workoutPlan, string? notes)
+        public async Task<bool> AssignMemberAsync(int trainerId, int memberId, string? workoutPlan, string? notes, decimal personalTrainingCharge)
         {
             var trainer = await _trainerRepo.GetByIdAsync(trainerId);
             if (trainer == null) return false;
@@ -141,6 +229,7 @@ namespace BLL.Services
                 MemberId = memberId,
                 WorkoutPlan = workoutPlan,
                 TrainingNotes = notes,
+                PersonalTrainingCharge = personalTrainingCharge,
                 AssignedDate = DateTime.Now,
                 IsActive = true
             });
@@ -203,6 +292,7 @@ namespace BLL.Services
             Phone = t.Phone,
             TrainingTime = t.TrainingTime,
             AssignedMembersCount = t.TrainerAssignments?.Count(ta => ta.IsActive) ?? 0,
+            PTMembersCount = t.PersonalTrainingSessions?.Select(pts => pts.MemberId).Distinct().Count() ?? 0,
             AverageRating = Math.Round(avgRating, 1),
             TotalReviews = t.TrainerReviews?.Count ?? 0,
             Assignments = t.TrainerAssignments?.Where(ta => ta.IsActive).Select(ta => 
@@ -224,6 +314,7 @@ namespace BLL.Services
                     MemberWorkoutTime = workoutTime,
                     WorkoutPlan = ta.WorkoutPlan,
                     TrainingNotes = ta.TrainingNotes,
+                    PersonalTrainingCharge = ta.PersonalTrainingCharge,
                     AssignedDate = ta.AssignedDate,
                     IsActive = ta.IsActive
                 };

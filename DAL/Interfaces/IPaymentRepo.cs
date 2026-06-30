@@ -8,7 +8,7 @@ namespace DAL.Interfaces
         Task<IEnumerable<Payment>> GetAllAsync();
         Task<Payment?> GetByIdAsync(int id);
         Task<IEnumerable<Payment>> GetByMemberIdAsync(int memberId);
-        Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year);
+        Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null);
         Task AddAsync(Payment payment);
         Task UpdateAsync(Payment payment);
         Task<int> GetPendingCountAsync();
@@ -16,7 +16,7 @@ namespace DAL.Interfaces
 
         // Trainer Salary Payments
         Task<IEnumerable<TrainerPayment>> GetAllTrainerPaymentsAsync();
-        Task<IEnumerable<TrainerPayment>> GetFilteredTrainerPaymentsAsync(int? trainerId, int? month, int? year);
+        Task<IEnumerable<TrainerPayment>> GetFilteredTrainerPaymentsAsync(string? search, int? trainerId, int? month, int? year, DateTime? date = null);
         Task<TrainerPayment?> GetTrainerPaymentByIdAsync(int id);
         Task<IEnumerable<TrainerPayment>> GetTrainerPaymentsByTrainerIdAsync(int trainerId);
         Task AddTrainerPaymentAsync(TrainerPayment payment);
@@ -24,11 +24,15 @@ namespace DAL.Interfaces
 
         // Personal Training Sessions
         Task<IEnumerable<PersonalTrainingSession>> GetAllPTSessionsAsync();
-        Task<IEnumerable<PersonalTrainingSession>> GetFilteredPTSessionsAsync(int? trainerId, int? month, int? year);
+        Task<IEnumerable<PersonalTrainingSession>> GetFilteredPTSessionsAsync(int? trainerId, int? month, int? year, DateTime? date = null, string? status = null, string? paymentMethod = null);
         Task<PersonalTrainingSession?> GetPTSessionByIdAsync(int id);
         Task<int> GetPTSlotBookingsAsync(int trainerId, DateTime date, string timeSlot);
         Task AddPTSessionAsync(PersonalTrainingSession session);
         Task UpdatePTSessionAsync(PersonalTrainingSession session);
+
+        // Personal Training Fee Payments (from Payment table, filtered by PT notes)
+        Task<IEnumerable<Payment>> GetPTFeePaymentsByMemberIdAsync(int memberId);
+        Task<IEnumerable<Payment>> GetPTFeePaymentsForTrainerStudentsAsync(int trainerId, int? month, int? year);
     }
 }
 

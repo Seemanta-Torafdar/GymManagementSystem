@@ -13,6 +13,7 @@ namespace DAL.Interfaces
         Task<int> GetTotalCountAsync();
         Task<IEnumerable<TrainerAssignment>> GetAssignmentsByTrainerIdAsync(int trainerId);
         Task<TrainerAssignment?> GetAssignmentByIdAsync(int id);
+        Task<TrainerAssignment?> GetActiveAssignmentByMemberIdAsync(int memberId);
         Task UpdateTrainerAssignmentAsync(TrainerAssignment assignment);
     }
 }

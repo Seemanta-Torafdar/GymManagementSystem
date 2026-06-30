@@ -101,6 +101,7 @@ namespace BLL.Services
                     {
                         TrainerId = dto.TrainerId.Value,
                         MemberId = member.Id,
+                        PersonalTrainingCharge = trainer.TrainingCharge,
                         AssignedDate = DateTime.Now,
                         IsActive = true
                     });
@@ -157,6 +158,14 @@ namespace BLL.Services
         {
             var activePurchase = m.MembershipPurchases?.OrderByDescending(p => p.StartDate).FirstOrDefault(p => p.IsActive);
             var activeAssignment = m.TrainerAssignments?.FirstOrDefault(ta => ta.IsActive);
+
+            // Find the current month's PT fee payment (if any)
+            var currentMonthPTPayment = m.Payments?
+                .Where(p => p.PackageName != null && p.PackageName.StartsWith("PT Fee")
+                    && p.DueDate.Month == DateTime.Now.Month && p.DueDate.Year == DateTime.Now.Year)
+                .OrderByDescending(p => p.CreatedAt)
+                .FirstOrDefault();
+
             return new MemberDTO
             {
                 Id = m.Id,
@@ -187,7 +196,11 @@ namespace BLL.Services
                 CardioClassName = activePurchase?.CardioSchedule?.ClassName,
                 CardioTimeRange = activePurchase?.CardioSchedule != null ? $"{activePurchase.CardioSchedule.DayOfWeek} {activePurchase.CardioSchedule.StartTime:hh\\:mm} - {activePurchase.CardioSchedule.EndTime:hh\\:mm}" : null,
                 AssignedTrainerId = activeAssignment?.TrainerId,
-                AssignedTrainerName = activeAssignment?.Trainer?.User != null ? $"{activeAssignment.Trainer.User.FirstName} {activeAssignment.Trainer.User.LastName}" : null
+                AssignedTrainerName = activeAssignment?.Trainer?.User != null ? $"{activeAssignment.Trainer.User.FirstName} {activeAssignment.Trainer.User.LastName}" : null,
+                AssignedTrainerEmail = activeAssignment?.Trainer?.User?.Email,
+                PersonalTrainingCharge = activeAssignment?.PersonalTrainingCharge ?? 0,
+                PersonalTrainingAmountPaid = currentMonthPTPayment?.AmountPaid ?? 0,
+                PersonalTrainingPaymentStatus = currentMonthPTPayment?.PaymentStatus
             };
         }
     }

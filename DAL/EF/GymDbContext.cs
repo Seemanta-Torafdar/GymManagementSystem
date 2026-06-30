@@ -121,6 +121,8 @@ namespace DAL.EF
                 .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<EquipmentInventory>()
                 .Property(ei => ei.PurchasePrice).HasPrecision(18, 2);
+            builder.Entity<TrainerAssignment>()
+                .Property(ta => ta.PersonalTrainingCharge).HasPrecision(18, 2);
 
             // ---- SEED DATA ----
             SeedRoles(builder);
@@ -277,8 +279,8 @@ namespace DAL.EF
 
             // Trainer Assignments
             builder.Entity<TrainerAssignment>().HasData(
-                new TrainerAssignment { Id = 1, TrainerId = 1, MemberId = 1, AssignedDate = new DateTime(2024, 3, 1), WorkoutPlan = "5-day split: Chest/Back/Legs/Shoulders/Arms", TrainingNotes = "Focus on compound movements", IsActive = true },
-                new TrainerAssignment { Id = 2, TrainerId = 2, MemberId = 2, AssignedDate = new DateTime(2024, 3, 10), WorkoutPlan = "3-day full body workout + yoga", TrainingNotes = "Beginner friendly routine", IsActive = true }
+                new TrainerAssignment { Id = 1, TrainerId = 1, MemberId = 1, AssignedDate = new DateTime(2024, 3, 1), WorkoutPlan = "5-day split: Chest/Back/Legs/Shoulders/Arms", TrainingNotes = "Focus on compound movements", IsActive = true, PersonalTrainingCharge = 3000 },
+                new TrainerAssignment { Id = 2, TrainerId = 2, MemberId = 2, AssignedDate = new DateTime(2024, 3, 10), WorkoutPlan = "3-day full body workout + yoga", TrainingNotes = "Beginner friendly routine", IsActive = true, PersonalTrainingCharge = 2500 }
             );
 
             // Payments - removed seeded records to start fresh (members were deleted)

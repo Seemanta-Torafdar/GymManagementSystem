@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BLL.DTOs.PaymentDTO>
+@model IEnumerable<BLL.DTOs.PaymentDTO>
 @{
     ViewData["Title"] = "Member Payments";
     Layout = "_AdminLayout";
@@ -21,57 +21,67 @@
     <div class="table-card-header" style="flex-wrap:wrap;gap:12px">
         <span class="table-card-title">All Payments (@Model.Count())</span>
         <form method="get" action="/Admin/Payments" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input type="text" name="search" value="@ViewBag.Search" placeholder="Search member..." class="form-control" style="width:180px" />
-            <select name="month" class="form-control" style="width:140px">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Search member..." class="form-control" style="width:160px" />
+            <input type="date" name="date" value="@ViewBag.Date" class="form-control" style="width:140px" />
+            <select name="month" class="form-control" style="width:130px">
                 <option value="">All Months</option>
                 @for(int m = 1; m <= 12; m++){
                     <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
                 }
             </select>
-            <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:90px" />
-            <button type="submit" class="btn-primary" style="padding:8px 16px"><i class="fas fa-filter"></i> Filter</button>
-            @if(ViewBag.Search != null || ViewBag.Month != null || ViewBag.Year != null){
-                <a asp-action="Payments" class="btn-secondary" style="padding:8px 16px">Clear</a>
+            <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:85px" />
+            <button type="submit" class="btn-primary" style="padding:8px 14px"><i class="fas fa-filter"></i> Filter</button>
+            @if(ViewBag.Search != null || ViewBag.Month != null || ViewBag.Year != null || ViewBag.Date != null){
+                <a asp-action="Payments" class="btn-secondary" style="padding:8px 14px">Clear</a>
             }
         </form>
     </div>
     <div style="overflow-x:auto">
         <table class="data-table">
             <thead><tr>
-                <th>Member</th><th>Package</th><th>Total</th><th>Paid</th><th>Due</th>
-                <th>Status</th><th>Method</th><th>Payment Date</th><th>Actions</th>
+                <th>Member</th><th>Gym Package</th><th>Payment Type & Amount</th>
+                <th>Status</th><th>Payment Date</th><th>Actions</th>
             </tr></thead>
             <tbody>
                 @foreach (var p in Model)
                 {
                     <tr>
                         <td><strong>@p.MemberName</strong></td>
-                        <td>@(p.PackageName ?? "—")</td>
-                        <td style="font-weight:700">৳@p.TotalAmount.ToString("N0")</td>
-                        <td style="color:#4ade80">৳@p.AmountPaid.ToString("N0")</td>
-                        <td style="color:var(--accent)">৳@p.DueAmount.ToString("N0")</td>
+                        <td>
+                            @if (p.PackageName != null && p.PackageName.StartsWith("PT Fee"))
+                            {
+                                <span style="color:var(--text-muted);font-style:italic">Personal Training</span>
+                            }
+                            else
+                            {
+                                @(p.PackageName ?? "—")
+                            }
+                        </td>
+                        <td>
+                            @if (p.PackageName != null && p.PackageName.StartsWith("PT Fee"))
+                            {
+                                <div style="font-weight:700;color:#818cf8"><i class="fas fa-dumbbell"></i> PT Payment</div>
+                            }
+                            else
+                            {
+                                <div style="font-weight:700;color:var(--text-primary)"><i class="fas fa-id-card"></i> Gym Package</div>
+                            }
+                            <div style="font-weight:800;font-size:1.1rem;margin-top:4px">৳@p.TotalAmount.ToString("N0")</div>
+                        </td>
                         <td>
                             @if (p.PaymentStatus == "Paid")
                             { <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> }
-                            else if (p.PaymentStatus == "Partial Paid")
-                            { <span class="badge badge-warning"><i class="fas fa-adjust"></i> Partial</span> }
                             else
                             { <span class="badge badge-danger"><i class="fas fa-times"></i> Unpaid</span> }
                         </td>
-                        <td>@(p.PaymentMethod ?? "—")</td>
                         <td>@(p.PaymentDate?.ToString("MMM dd, yyyy") ?? "—")</td>
                         <td>
                             @if (p.PaymentStatus != "Paid")
                             {
-                                <form asp-action="RecordMemberPayment" method="post" style="display:flex;flex-direction:column;gap:6px;min-width:160px">
+                                <form asp-action="MarkPaid" method="post" style="display:inline">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@p.Id" />
-                                    <input type="number" name="amountPaid" class="form-control" style="padding:4px 8px;font-size:0.82rem" placeholder="Amount to Pay" value="@p.DueAmount" step="0.01" required />
-                                    <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.82rem">
-                                        <option>Cash</option><option>Bank Transfer</option><option>bKash</option>
-                                    </select>
-                                    <input type="text" name="notes" class="form-control" style="padding:4px 8px;font-size:0.82rem" placeholder="Notes (optional)" />
-                                    <button type="submit" class="btn-sm btn-success"><i class="fas fa-check"></i> Record Payment</button>
+                                    <button type="submit" class="btn-success btn-sm"><i class="fas fa-check"></i> Mark Paid</button>
                                 </form>
                             }
                             else

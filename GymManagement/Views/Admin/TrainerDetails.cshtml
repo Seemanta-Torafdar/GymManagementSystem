@@ -24,14 +24,54 @@
         <div style="display:flex;justify-content:center;gap:12px;margin-bottom:24px">
             <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.AssignedMembersCount</div><div style="font-size:0.75rem;color:var(--text-muted)">Students</div></div>
             <div style="width:1px;background:var(--border)"></div>
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.PTMembersCount</div><div style="font-size:0.75rem;color:var(--text-muted)">PT Students</div></div>
+            <div style="width:1px;background:var(--border)"></div>
             <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.Experience</div><div style="font-size:0.75rem;color:var(--text-muted)">Years Exp</div></div>
             <div style="width:1px;background:var(--border)"></div>
             <div style="text-align:center"><div style="font-size:1.2rem;font-weight:700">@Model.AverageRating</div><div style="font-size:0.75rem;color:var(--text-muted)">Rating</div></div>
         </div>
         
-        <div style="padding:16px;background:var(--bg-input);border-radius:var(--radius-sm);margin-bottom:20px">
-            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px">Monthly Salary</div>
-            <div style="font-size:1.5rem;font-weight:800;color:#4ade80">৳@Model.MonthlySalary.ToString("N0")</div>
+        <div style="background:var(--bg-input);border-radius:var(--radius-sm);margin-bottom:20px;overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700">Contact Info</div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <i class="fas fa-envelope" style="color:var(--text-muted);width:16px;text-align:center"></i>
+                    <a href="mailto:@Model.Email" style="color:var(--text-primary);text-decoration:none;font-size:0.9rem">@Model.Email</a>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <i class="fas fa-phone" style="color:var(--text-muted);width:16px;text-align:center"></i>
+                    <a href="tel:@Model.Phone" style="color:var(--text-primary);text-decoration:none;font-size:0.9rem">@Model.Phone</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:var(--bg-input);border-radius:var(--radius-sm);margin-bottom:20px;overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700">Personal Info</div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted);font-size:0.9rem">Date of Birth</span>
+                    <span style="font-size:0.9rem;font-weight:600">@Model.DateOfBirth.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted);font-size:0.9rem">Join Date</span>
+                    <span style="font-size:0.9rem;font-weight:600">@Model.JoinDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted);font-size:0.9rem">Availability</span>
+                    <span style="font-size:0.9rem;font-weight:600">@(Model.IsAvailable ? "Active" : "Unavailable")</span>
+                </div>
+                @if(!string.IsNullOrEmpty(Model.TrainingTime)) {
+                <div style="display:flex;justify-content:space-between">
+                    <span style="color:var(--text-muted);font-size:0.9rem">Shift Time</span>
+                    <span style="font-size:0.9rem;font-weight:600">@Model.TrainingTime</span>
+                </div>
+                }
+            </div>
+        </div>
+        
+        <div style="padding:16px;background:var(--bg-input);border-radius:var(--radius-sm);margin-bottom:20px;text-align:center">
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Monthly Salary</div>
+            <div style="font-size:1.8rem;font-weight:800;color:#4ade80">৳@Model.MonthlySalary.ToString("N0")</div>
         </div>
     </div>
     

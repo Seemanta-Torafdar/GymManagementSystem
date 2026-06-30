@@ -13,15 +13,17 @@ namespace GymManagement.Controllers
         private readonly INotificationService _notificationService;
         private readonly IAdminService _adminService;
         private readonly IMemberService _memberService;
+        private readonly IPaymentService _paymentService;
         private readonly UserManager<User> _userManager;
 
         public TrainerController(ITrainerService trainerService, INotificationService notificationService,
-            IAdminService adminService, IMemberService memberService, UserManager<User> userManager)
+            IAdminService adminService, IMemberService memberService, IPaymentService paymentService, UserManager<User> userManager)
         {
             _trainerService = trainerService;
             _notificationService = notificationService;
             _adminService = adminService;
             _memberService = memberService;
+            _paymentService = paymentService;
             _userManager = userManager;
         }
 
@@ -42,15 +44,34 @@ namespace GymManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
             var trainer = await _trainerService.GetByUserIdAsync(user.Id);
-            return View(trainer);
+            if (trainer == null) return NotFound();
+            
+            var dto = new BLL.DTOs.TrainerProfileEditDTO
+            {
+                Id = trainer.Id, FirstName = trainer.FirstName, LastName = trainer.LastName,
+                Email = trainer.Email, Phone = trainer.Phone, Specialization = trainer.Specialization,
+                Experience = trainer.Experience, Bio = trainer.Bio, Certifications = trainer.Certifications,
+                IsAvailable = trainer.IsAvailable, DateOfBirth = trainer.DateOfBirth, TrainingTime = trainer.TrainingTime,
+                ProfilePhoto = trainer.ProfilePhoto
+            };
+            return View(dto);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfile(BLL.DTOs.TrainerEditDTO dto)
+        public async Task<IActionResult> UpdateProfile(BLL.DTOs.TrainerProfileEditDTO dto)
         {
-            await _trainerService.UpdateAsync(dto);
-            TempData["Success"] = "Profile updated successfully!";
+            var success = await _trainerService.UpdateProfileAsync(dto);
+            if (success)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                foreach (var admin in admins)
+                {
+                    await _notificationService.SendAsync(admin.Id, "Trainer Profile Updated", $"Trainer {dto.FirstName} {dto.LastName} has updated their profile details.");
+                }
+                TempData["Success"] = "Profile updated successfully!";
+            }
             return RedirectToAction(nameof(Profile));
         }
 
@@ -153,6 +174,44 @@ namespace GymManagement.Controllers
                 TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
             }
             return RedirectToAction(nameof(ChangePassword));
+        }
+
+        public async Task<IActionResult> StudentPayments(int? month, int? year)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+            var trainer = await _trainerService.GetByUserIdAsync(user.Id);
+            if (trainer == null) return RedirectToAction("Login", "Account");
+
+            var filterMonth = month ?? DateTime.Now.Month;
+            var filterYear = year ?? DateTime.Now.Year;
+
+            var payments = await _paymentService.GetStudentPaymentStatusAsync(trainer.Id, filterMonth, filterYear);
+            ViewBag.Trainer = trainer;
+            ViewBag.Month = filterMonth;
+            ViewBag.Year = filterYear;
+            return View(payments);
+        }
+
+        public async Task<IActionResult> MySalary(int? month, int? year)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+            var trainer = await _trainerService.GetByUserIdAsync(user.Id);
+            if (trainer == null) return RedirectToAction("Login", "Account");
+
+            var filterYear = year ?? DateTime.Now.Year;
+
+            // If month is not provided and it's a direct navigation, we might want to show all months by default, or just current.
+            // Let's pass the raw month filter down. If it's null, we filter by null (which means all months).
+            var payments = await _paymentService.GetFilteredTrainerPaymentsAsync(null, trainer.Id, month, filterYear);
+            
+            // Sort by month descending so newest is first
+            payments = payments.OrderByDescending(p => p.Month).ToList();
+
+            ViewBag.Month = month; // null means 'All Months'
+            ViewBag.Year = filterYear;
+            return View(payments);
         }
     }
 }

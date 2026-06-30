@@ -1,0 +1,126 @@
+@model IEnumerable<BLL.DTOs.PaymentDTO>
+@{
+    ViewData["Title"] = "Student Payments";
+    Layout = "_TrainerLayout";
+    var trainer = ViewBag.Trainer as BLL.DTOs.TrainerDTO;
+    var currentMonth = (int)ViewBag.Month;
+    var currentYear = (int)ViewBag.Year;
+    var monthName = new DateTime(currentYear, currentMonth, 1).ToString("MMMM yyyy");
+}
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1><i class="fas fa-money-bill-wave" style="color:var(--accent)"></i> Student Payments</h1>
+        <p>Track personal training fee payments from your allocated students.</p>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+@{
+    var totalStudents = trainer?.AssignedMembersCount ?? 0;
+    var totalPayments = Model.Count();
+    var paidCount = Model.Count(p => p.PaymentStatus == "Paid");
+    var unpaidCount = Model.Count(p => p.PaymentStatus == "Unpaid");
+    var partialCount = Model.Count(p => p.PaymentStatus == "Partial Paid");
+    var totalCollected = Model.Sum(p => p.AmountPaid);
+    var totalDue = Model.Sum(p => p.DueAmount);
+}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px">
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">@totalStudents</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Total Students</div>
+    </div>
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:#4ade80">@paidCount</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Paid</div>
+    </div>
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:#fbbf24">@partialCount</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Partial Paid</div>
+    </div>
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:#f87171">@unpaidCount</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Unpaid</div>
+    </div>
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:#818cf8">৳@totalCollected.ToString("N0")</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Collected</div>
+    </div>
+    <div class="card" style="padding:20px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:@(totalDue > 0 ? "#f87171" : "#4ade80")">৳@totalDue.ToString("N0")</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Due</div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title"><i class="fas fa-calendar" style="color:var(--accent)"></i> @monthName</span>
+        <form method="get" style="display:flex;align-items:center;gap:10px">
+            <select name="month" class="form-control" style="width:130px;padding:6px 10px;font-size:0.85rem">
+                @for (int m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(m == currentMonth)">@(new DateTime(2024, m, 1).ToString("MMMM"))</option>
+                }
+            </select>
+            <select name="year" class="form-control" style="width:100px;padding:6px 10px;font-size:0.85rem">
+                @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 3; y--)
+                {
+                    <option value="@y" selected="@(y == currentYear)">@y</option>
+                }
+            </select>
+            <button type="submit" class="btn-sm-accent"><i class="fas fa-filter"></i> Filter</button>
+        </form>
+    </div>
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Monthly Charge</th>
+                    <th>Amount Paid</th>
+                    <th>Due Amount</th>
+                    <th>Status</th>
+                    <th>Payment Date</th>
+                    <th>Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    var badgeClass = p.PaymentStatus == "Paid" ? "badge-success"
+                        : p.PaymentStatus == "Partial Paid" ? "badge-warning"
+                        : "badge-danger";
+                    <tr>
+                        <td>
+                            <strong>@p.MemberName</strong>
+                        </td>
+                        <td style="font-weight:700;color:var(--text-primary)">৳@p.TotalAmount.ToString("N0")</td>
+                        <td style="font-weight:700;color:#4ade80">৳@p.AmountPaid.ToString("N0")</td>
+                        <td style="font-weight:700;color:@(p.DueAmount > 0 ? "#f87171" : "#4ade80")">৳@p.DueAmount.ToString("N0")</td>
+                        <td>
+                            <span class="badge @badgeClass">
+                                <i class="fas @(p.PaymentStatus == "Paid" ? "fa-check-circle" : p.PaymentStatus == "Partial Paid" ? "fa-clock" : "fa-times-circle")"></i>
+                                @p.PaymentStatus
+                            </span>
+                        </td>
+                        <td style="font-size:0.85rem;color:var(--text-muted)">
+                            @(p.PaymentDate?.ToString("MMM dd, yyyy") ?? "—")
+                        </td>
+                        <td style="font-size:0.85rem;color:var(--text-muted)">@p.PaymentMethod</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:50px;color:var(--text-muted)">
+                            <i class="fas fa-receipt" style="font-size:2.5rem;display:block;margin-bottom:16px;opacity:0.25"></i>
+                            <div style="font-weight:700;margin-bottom:6px">No payment records for @monthName</div>
+                            <div style="font-size:0.85rem">PT fee payments from your students will appear here once the admin creates them.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

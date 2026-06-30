@@ -27,6 +27,7 @@
                     <th>Gym ID</th>
                     <th>Member</th>
                     <th>Allocated Trainer</th>
+                    <th>PT Charge</th>
                     <th>Trainer Action</th>
                 </tr>
             </thead>
@@ -53,8 +54,22 @@
                         <td>
                             <div style="display:flex;align-items:center;gap:10px">
                                 <div class="avatar" style="width:32px;height:32px;font-size:0.85rem">@m.AssignedTrainerName?.FirstOrDefault()</div>
-                                <strong>@m.AssignedTrainerName</strong>
+                                <div>
+                                    <strong>@m.AssignedTrainerName</strong>
+                                    <div style="font-size:0.8rem;color:var(--text-secondary)">@m.AssignedTrainerEmail</div>
+                                </div>
                             </div>
+                        </td>
+                        <td>
+                            @if (m.PersonalTrainingCharge > 0)
+                            {
+                                <span style="font-weight:700;color:#818cf8;font-size:0.95rem">৳@m.PersonalTrainingCharge.ToString("N0")</span>
+                                <div style="font-size:0.75rem;color:var(--text-muted)">/month</div>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-muted);font-style:italic">Not set</span>
+                            }
                         </td>
                         <td>
                             <div class="table-actions">
@@ -74,7 +89,7 @@
                 }
                 @if (!Model.Any())
                 {
-                    <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-muted)">
+                    <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted)">
                         <i class="fas fa-user-slash" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.3"></i>
                         No members found with a personal trainer.
                     </td></tr>

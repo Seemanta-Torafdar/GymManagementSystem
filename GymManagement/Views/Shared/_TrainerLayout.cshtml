@@ -24,8 +24,14 @@
                 <a asp-controller="Trainer" asp-action="Profile" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
                     <i class="fas fa-user-tie"></i><span>My Profile</span>
                 </a>
-                <a asp-controller="Trainer" asp-action="Students" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Students" ? "active" : "")">
+                <a asp-controller="Trainer" asp-action="Students" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Students" || ViewContext.RouteData.Values["action"]?.ToString() == "StudentDetails" ? "active" : "")">
                     <i class="fas fa-users"></i><span>My Students</span>
+                </a>
+                <a asp-controller="Trainer" asp-action="StudentPayments" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "StudentPayments" ? "active" : "")">
+                    <i class="fas fa-money-bill-wave"></i><span>Student Payments</span>
+                </a>
+                <a asp-controller="Trainer" asp-action="MySalary" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MySalary" ? "active" : "")">
+                    <i class="fas fa-money-check-alt"></i><span>My Salary</span>
                 </a>
                 <a asp-controller="Trainer" asp-action="Notifications" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Notifications" ? "active" : "")">
                     <i class="fas fa-bell"></i><span>Notifications</span>
