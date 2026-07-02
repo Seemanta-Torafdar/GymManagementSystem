@@ -17,7 +17,7 @@ namespace DAL.Repositories
             await _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<IEnumerable<Payment>> GetByMemberIdAsync(int memberId) =>
-            await _context.Payments.Where(p => p.MemberId == memberId).OrderByDescending(p => p.CreatedAt).ToListAsync();
+            await _context.Payments.Include(p => p.MembershipPurchase).Where(p => p.MemberId == memberId).OrderByDescending(p => p.CreatedAt).ToListAsync();
 
         public async Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null, string? packageName = null, string? paymentStatus = null)
         {

@@ -19,6 +19,7 @@ namespace DAL.EF.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public virtual Member Member { get; set; } = null!;
+        public virtual MembershipPurchase? MembershipPurchase { get; set; }
     }
 }
 

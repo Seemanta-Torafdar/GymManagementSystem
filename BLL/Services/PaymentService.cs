@@ -172,7 +172,10 @@ namespace BLL.Services
             GymId = p.Member?.GymId, MemberEmail = p.Member?.User?.Email,
             PackageName = p.PackageName, TotalAmount = p.TotalAmount, AmountPaid = p.AmountPaid,
             PaymentStatus = p.PaymentStatus, PaymentMethod = p.PaymentMethod,
-            PaymentDate = p.PaymentDate, DueDate = p.DueDate, Notes = p.Notes, CreatedAt = p.CreatedAt
+            PaymentDate = p.PaymentDate, DueDate = p.DueDate, 
+            PackageStartDate = p.MembershipPurchase?.StartDate,
+            PackageEndDate = p.MembershipPurchase?.EndDate,
+            Notes = p.Notes, CreatedAt = p.CreatedAt
         };
 
         private static TrainerPaymentDTO MapTrainerPaymentToDTO(TrainerPayment tp) => new()

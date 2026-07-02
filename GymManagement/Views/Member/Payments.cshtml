@@ -70,7 +70,15 @@
                 {
                     var badgeClass = p.PaymentStatus == "Paid" ? "badge-success" : p.PaymentStatus == "Partial Paid" ? "badge-warning" : "badge-danger";
                     <tr>
-                        <td><strong>@(p.PackageName ?? "Membership")</strong></td>
+                        <td>
+                            <strong>@(p.PackageName ?? "Membership")</strong>
+                            @if (p.PackageStartDate.HasValue && p.PackageEndDate.HasValue)
+                            {
+                                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                                    (Valid: @p.PackageStartDate.Value.ToString("MMM dd, yyyy") - @p.PackageEndDate.Value.ToString("MMM dd, yyyy"))
+                                </div>
+                            }
+                        </td>
                         <td style="font-weight:600">৳@p.TotalAmount.ToString("N0")</td>
                         <td style="color:#4ade80;font-weight:600">৳@p.AmountPaid.ToString("N0")</td>
                         <td><span class="badge @badgeClass">@p.PaymentStatus</span></td>

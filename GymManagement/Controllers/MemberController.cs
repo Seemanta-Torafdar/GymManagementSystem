@@ -154,10 +154,31 @@ namespace GymManagement.Controllers
 
             var payments = await _paymentService.GetByMemberIdAsync(member.Id);
             
-            if (month.HasValue)
-                payments = payments.Where(p => p.DueDate.Month == month.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Month == month.Value));
-            if (year.HasValue)
-                payments = payments.Where(p => p.DueDate.Year == year.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Year == year.Value));
+            if (month.HasValue && year.HasValue)
+            {
+                payments = payments.Where(p => 
+                    (p.PackageStartDate.HasValue && p.PackageEndDate.HasValue && 
+                     new DateTime(p.PackageStartDate.Value.Year, p.PackageStartDate.Value.Month, 1) <= new DateTime(year.Value, month.Value, 1) &&
+                     new DateTime(p.PackageEndDate.Value.Year, p.PackageEndDate.Value.Month, 1) >= new DateTime(year.Value, month.Value, 1)) ||
+                    (!p.PackageStartDate.HasValue && p.DueDate.Month == month.Value && p.DueDate.Year == year.Value)
+                );
+            }
+            else if (month.HasValue)
+            {
+                payments = payments.Where(p => 
+                    (p.PackageStartDate.HasValue && p.PackageEndDate.HasValue && 
+                     p.PackageStartDate.Value.Month <= month.Value && p.PackageEndDate.Value.Month >= month.Value) ||
+                    (!p.PackageStartDate.HasValue && (p.DueDate.Month == month.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Month == month.Value)))
+                );
+            }
+            else if (year.HasValue)
+            {
+                payments = payments.Where(p => 
+                    (p.PackageStartDate.HasValue && p.PackageEndDate.HasValue && 
+                     p.PackageStartDate.Value.Year <= year.Value && p.PackageEndDate.Value.Year >= year.Value) ||
+                    (!p.PackageStartDate.HasValue && (p.DueDate.Year == year.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Year == year.Value)))
+                );
+            }
                 
             ViewBag.Month = month;
             ViewBag.Year = year;

@@ -16,6 +16,8 @@ namespace BLL.DTOs
         public string PaymentMethod { get; set; } = string.Empty;
         public DateTime? PaymentDate { get; set; }
         public DateTime DueDate { get; set; }
+        public DateTime? PackageStartDate { get; set; }
+        public DateTime? PackageEndDate { get; set; }
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }
     }
