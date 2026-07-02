@@ -19,6 +19,7 @@
 
 <div class="card" style="padding:20px; margin-bottom:24px;">
     <form method="get" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <input type="hidden" name="tab" id="activeTabInput" value="@(Context.Request.Query["tab"].ToString() == "pt" ? "pt" : "gym")" />
         <div style="font-weight:700;color:var(--text-color)"><i class="fas fa-filter text-muted"></i> Filter Records:</div>
         
         <select name="month" class="form-control" style="width:150px">
@@ -136,6 +137,8 @@
 @section Scripts {
     <script>
         function showTab(tabName) {
+            document.getElementById('activeTabInput').value = tabName;
+            
             if (tabName === 'gym') {
                 document.getElementById('gym-payments-section').style.display = 'block';
                 document.getElementById('pt-payments-section').style.display = 'none';
@@ -150,5 +153,15 @@
                 document.getElementById('btn-pt-payments').className = 'btn-primary';
             }
         }
+        
+        // On page load, set the correct tab
+        document.addEventListener('DOMContentLoaded', function() {
+            var activeTab = document.getElementById('activeTabInput').value;
+            if (activeTab === 'pt') {
+                showTab('pt');
+            } else {
+                showTab('gym');
+            }
+        });
     </script>
 }
