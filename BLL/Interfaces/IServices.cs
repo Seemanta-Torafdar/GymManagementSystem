@@ -62,12 +62,13 @@ namespace BLL.Interfaces
     {
         // Member Payments
         Task<IEnumerable<PaymentDTO>> GetAllAsync();
-        Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null);
+        Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null, string? packageName = null, string? paymentStatus = null);
         Task<IEnumerable<PaymentDTO>> GetByMemberIdAsync(int memberId);
         Task<bool> RecordMemberPaymentAsync(int paymentId, decimal amountPaid, string paymentMethod, string? notes);
         Task<bool> MarkAsPaidAsync(int paymentId);
         Task<bool> MarkAsUnpaidAsync(int paymentId);
         Task<bool> CreatePaymentAsync(int memberId, decimal amount, DateTime dueDate, int? purchaseId, string? packageName = null, string? notes = null);
+        Task<PaymentDTO?> GetPaymentByIdAsync(int paymentId);
         Task<decimal> GetMonthlyRevenueAsync(int month, int year);
 
         // Trainer Salary
@@ -85,7 +86,7 @@ namespace BLL.Interfaces
         Task<bool> PayPTSessionAsync(int sessionId, decimal amountPaid, string paymentMethod, string? notes);
 
         // Personal Training Fee Status for Trainer Dashboard
-        Task<IEnumerable<PaymentDTO>> GetStudentPaymentStatusAsync(int trainerId, int? month, int? year);
+        Task<IEnumerable<PaymentDTO>> GetStudentPaymentStatusAsync(int trainerId, int? month, int? year, string? paymentStatus = null);
     }
 
     public interface IEquipmentService

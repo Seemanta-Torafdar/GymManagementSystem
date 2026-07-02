@@ -183,12 +183,14 @@ namespace GymManagement.Controllers
             var trainer = await _trainerService.GetByUserIdAsync(user.Id);
             if (trainer == null) return RedirectToAction("Login", "Account");
 
-            var filterMonth = month ?? DateTime.Now.Month;
+            // Pass null month/year by default so ALL PT payments are shown (not just current month).
+            // Trainer was always seeing an empty list if their students' fees were created in a prior month.
+            var filterMonth = month;
             var filterYear = year ?? DateTime.Now.Year;
 
             var payments = await _paymentService.GetStudentPaymentStatusAsync(trainer.Id, filterMonth, filterYear);
             ViewBag.Trainer = trainer;
-            ViewBag.Month = filterMonth;
+            ViewBag.Month = filterMonth;  // may be null = "All Months"
             ViewBag.Year = filterYear;
             return View(payments);
         }

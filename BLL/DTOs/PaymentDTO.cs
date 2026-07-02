@@ -6,6 +6,8 @@ namespace BLL.DTOs
         public int Id { get; set; }
         public int MemberId { get; set; }
         public string MemberName { get; set; } = string.Empty;
+        public string? GymId { get; set; }
+        public string? MemberEmail { get; set; }
         public string? PackageName { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal AmountPaid { get; set; }

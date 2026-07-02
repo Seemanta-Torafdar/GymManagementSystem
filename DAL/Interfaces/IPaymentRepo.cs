@@ -8,7 +8,7 @@ namespace DAL.Interfaces
         Task<IEnumerable<Payment>> GetAllAsync();
         Task<Payment?> GetByIdAsync(int id);
         Task<IEnumerable<Payment>> GetByMemberIdAsync(int memberId);
-        Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null);
+        Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null, string? packageName = null, string? paymentStatus = null);
         Task AddAsync(Payment payment);
         Task UpdateAsync(Payment payment);
         Task<int> GetPendingCountAsync();
@@ -32,7 +32,7 @@ namespace DAL.Interfaces
 
         // Personal Training Fee Payments (from Payment table, filtered by PT notes)
         Task<IEnumerable<Payment>> GetPTFeePaymentsByMemberIdAsync(int memberId);
-        Task<IEnumerable<Payment>> GetPTFeePaymentsForTrainerStudentsAsync(int trainerId, int? month, int? year);
+        Task<IEnumerable<Payment>> GetPTFeePaymentsForTrainerStudentsAsync(int trainerId, int? month, int? year, string? paymentStatus = null);
     }
 }
 

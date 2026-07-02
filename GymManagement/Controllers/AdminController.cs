@@ -92,7 +92,9 @@ namespace GymManagement.Controllers
         {
             var member = await _memberService.GetByIdAsync(id);
             if (member == null) return NotFound();
-            var dto = new MemberEditDTO { Id = member.Id, FirstName = member.FirstName, LastName = member.LastName, Phone = member.Phone, Gender = member.Gender, DateOfBirth = member.DateOfBirth, Address = member.Address, BloodGroup = member.BloodGroup, EmergencyContact = member.EmergencyContact, EmergencyPhone = member.EmergencyPhone, MedicalNotes = member.MedicalNotes };
+            var dto = new MemberEditDTO { Id = member.Id, FirstName = member.FirstName, LastName = member.LastName, Phone = member.Phone, Gender = member.Gender, DateOfBirth = member.DateOfBirth, Address = member.Address, BloodGroup = member.BloodGroup, EmergencyContact = member.EmergencyContact, EmergencyPhone = member.EmergencyPhone, MedicalNotes = member.MedicalNotes, PackageId = member.ActivePackageId, ShiftId = member.ActiveShiftId };
+            ViewBag.Packages = await _membershipService.GetAllPackagesAsync();
+            ViewBag.Shifts = await _membershipService.GetAllShiftsAsync();
             return View(dto);
         }
 
@@ -101,6 +103,14 @@ namespace GymManagement.Controllers
         public async Task<IActionResult> EditMember(MemberEditDTO dto)
         {
             await _memberService.UpdateAsync(dto);
+            if (dto.PackageId.HasValue && dto.ShiftId.HasValue)
+            {
+                var member = await _memberService.GetByIdAsync(dto.Id);
+                if (member != null && (member.ActivePackageId != dto.PackageId || member.ActiveShiftId != dto.ShiftId))
+                {
+                    await _membershipService.RenewMembershipAsync(dto.Id, dto.PackageId.Value, dto.ShiftId.Value);
+                }
+            }
             TempData["Success"] = "Member updated successfully!";
             return RedirectToAction(nameof(Members));
         }
@@ -205,11 +215,11 @@ namespace GymManagement.Controllers
             
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.ToLower();
+                search = search.Trim().ToLower();
                 members = members.Where(m =>
-                    m.FullName.ToLower().Contains(search) ||
-                    (m.GymId?.ToLower().Contains(search) ?? false) ||
-                    (m.Email?.ToLower().Contains(search) ?? false));
+                    (m.FullName != null && m.FullName.ToLower().Contains(search)) ||
+                    (m.GymId != null && m.GymId.ToLower() == search) ||
+                    (m.Email != null && m.Email.ToLower() == search));
             }
             ViewBag.Search = search;
             return View(members);
@@ -249,7 +259,7 @@ namespace GymManagement.Controllers
                 var trainer = await _trainerService.GetByIdAsync(trainerId);
                 string trainerName = trainer?.FullName ?? "Personal Trainer";
                 string paymentNotes = $"PT Fee - {trainerName} ({DateTime.Now:MMMM yyyy})";
-                await _paymentService.CreatePaymentAsync(memberId, personalTrainingCharge, DateTime.Today.AddDays(30), null, paymentNotes);
+                await _paymentService.CreatePaymentAsync(memberId, personalTrainingCharge, DateTime.Today, null, paymentNotes);
             }
 
             TempData["Success"] = "Trainer assigned successfully!";
@@ -387,13 +397,17 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(Equipment));
         }
 
-        public async Task<IActionResult> Payments(string? search, int? month, int? year, DateTime? date)
+        public async Task<IActionResult> Payments(string? search, int? month, int? year, DateTime? date, string? packageName, string? paymentStatus)
         {
-            var payments = await _paymentService.GetFilteredAsync(search, month, year, date);
+            var payments = await _paymentService.GetFilteredAsync(search, month, year, date, packageName, paymentStatus);
+            var packages = await _membershipService.GetAllPackagesAsync();
+            ViewBag.Packages = packages;
             ViewBag.Search = search;
             ViewBag.Month = month;
             ViewBag.Year = year;
             ViewBag.Date = date?.ToString("yyyy-MM-dd");
+            ViewBag.PackageName = packageName;
+            ViewBag.PaymentStatus = paymentStatus;
             ViewBag.MonthlyRevenue = await _paymentService.GetMonthlyRevenueAsync(DateTime.Now.Month, DateTime.Now.Year);
             return View(payments);
         }
@@ -455,35 +469,85 @@ namespace GymManagement.Controllers
             return RedirectToAction(nameof(TrainerPayments));
         }
 
-        // Personal Training Sessions
-        public async Task<IActionResult> PersonalTraining(int? trainerId, int? month, int? year, DateTime? date, string? status, string? paymentMethod)
+        // Personal Training Fee Dashboard
+        public async Task<IActionResult> PersonalTraining(int? trainerId, int? month, int? year, string? paymentStatus)
         {
-            var sessions = await _paymentService.GetFilteredPTSessionsAsync(trainerId, month, year, date, status, paymentMethod);
-            ViewBag.Trainers = await _trainerService.GetAllAsync();
-            ViewBag.Members = await _memberService.GetAllAsync();
-            ViewBag.TrainerId = trainerId;
+            var trainers = await _trainerService.GetAllAsync();
+            var firstTrainerId = trainers.FirstOrDefault()?.Id;
+            var activeTrainerId = trainerId ?? firstTrainerId ?? 0;
+
+            var fees = activeTrainerId > 0 
+                ? await _paymentService.GetStudentPaymentStatusAsync(activeTrainerId, month, year, paymentStatus)
+                : Enumerable.Empty<BLL.DTOs.PaymentDTO>();
+                
+            ViewBag.Trainers = trainers;
+            ViewBag.TrainerId = activeTrainerId;
             ViewBag.Month = month;
             ViewBag.Year = year;
-            ViewBag.Date = date?.ToString("yyyy-MM-dd");
-            ViewBag.Status = status;
-            ViewBag.PaymentMethod = paymentMethod;
-            return View(sessions);
+            ViewBag.PaymentStatus = paymentStatus;
+            return View(fees);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePTSession(int trainerId, int memberId, DateTime sessionDate, string timeSlot, decimal charge)
+        public async Task<IActionResult> MarkPTPaid(int id, int trainerId)
         {
-            await _paymentService.CreatePTSessionAsync(trainerId, memberId, sessionDate, timeSlot, charge);
-            TempData["Success"] = "Personal training session created.";
-            return RedirectToAction(nameof(PersonalTraining));
+            // Fetch payment before marking paid so we can send the right notification
+            var payment = await _paymentService.GetPaymentByIdAsync(id);
+            await _paymentService.MarkAsPaidAsync(id);
+
+            if (payment != null)
+            {
+                // Notify the member
+                var member = await _memberService.GetByIdAsync(payment.MemberId);
+                if (member != null)
+                {
+                    var memberUser = await _userManager.FindByEmailAsync(member.Email);
+                    if (memberUser != null)
+                        await _notificationService.SendAsync(memberUser.Id,
+                            "PT Fee Payment Confirmed ✅",
+                            $"Your personal training fee of ৳{payment.TotalAmount:N0} has been marked as Paid for {payment.DueDate:MMMM yyyy}. Thank you!",
+                            "Success");
+                }
+
+                // Notify the trainer
+                var trainer = await _trainerService.GetByIdAsync(trainerId);
+                if (trainer != null)
+                {
+                    var trainerUser = await _userManager.FindByEmailAsync(trainer.Email);
+                    if (trainerUser != null)
+                        await _notificationService.SendAsync(trainerUser.Id,
+                            "Student PT Fee Paid ✅",
+                            $"{payment.MemberName}'s personal training fee of ৳{payment.TotalAmount:N0} for {payment.DueDate:MMMM yyyy} has been confirmed as Paid.",
+                            "Success");
+                }
+            }
+
+            TempData["Success"] = "PT Fee marked as paid.";
+            return RedirectToAction(nameof(PersonalTraining), new { trainerId = trainerId });
         }
 
         [HttpPost]
-        public async Task<IActionResult> PayPTSession(int id, decimal amountPaid, string paymentMethod, string? notes)
+        public async Task<IActionResult> MarkPTUnpaid(int id, int trainerId)
         {
-            await _paymentService.PayPTSessionAsync(id, amountPaid, paymentMethod, notes);
-            TempData["Success"] = "PT session payment recorded.";
-            return RedirectToAction(nameof(PersonalTraining));
+            var payment = await _paymentService.GetPaymentByIdAsync(id);
+            await _paymentService.MarkAsUnpaidAsync(id);
+
+            if (payment != null)
+            {
+                var member = await _memberService.GetByIdAsync(payment.MemberId);
+                if (member != null)
+                {
+                    var memberUser = await _userManager.FindByEmailAsync(member.Email);
+                    if (memberUser != null)
+                        await _notificationService.SendAsync(memberUser.Id,
+                            "PT Fee Payment Updated ⚠️",
+                            $"Your personal training fee of ৳{payment.TotalAmount:N0} for {payment.DueDate:MMMM yyyy} has been marked as Unpaid. Please visit the front desk.",
+                            "Warning");
+                }
+            }
+
+            TempData["Success"] = "PT Fee marked as unpaid.";
+            return RedirectToAction(nameof(PersonalTraining), new { trainerId = trainerId });
         }
 
         // --- Gym Shift CRUD ---

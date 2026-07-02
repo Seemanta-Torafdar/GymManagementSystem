@@ -15,8 +15,8 @@ namespace BLL.Services
         public async Task<IEnumerable<PaymentDTO>> GetAllAsync() =>
             (await _repo.GetAllAsync()).Select(MapToDTO);
 
-        public async Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null) =>
-            (await _repo.GetFilteredAsync(search, month, year, date)).Select(MapToDTO);
+        public async Task<IEnumerable<PaymentDTO>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null, string? packageName = null, string? paymentStatus = null) =>
+            (await _repo.GetFilteredAsync(search, month, year, date, packageName, paymentStatus)).Select(MapToDTO);
 
         public async Task<IEnumerable<PaymentDTO>> GetByMemberIdAsync(int memberId) =>
             (await _repo.GetByMemberIdAsync(memberId)).Select(MapToDTO);
@@ -65,6 +65,12 @@ namespace BLL.Services
 
         public async Task<decimal> GetMonthlyRevenueAsync(int month, int year) =>
             await _repo.GetMonthlyRevenueAsync(month, year);
+
+        public async Task<PaymentDTO?> GetPaymentByIdAsync(int paymentId)
+        {
+            var p = await _repo.GetByIdAsync(paymentId);
+            return p == null ? null : MapToDTO(p);
+        }
 
         // ── Trainer Salary Payments ──────────────────────────────────────────────
         public async Task<IEnumerable<TrainerPaymentDTO>> GetAllTrainerPaymentsAsync() =>
@@ -152,9 +158,9 @@ namespace BLL.Services
         }
 
         // ── Personal Training Fee Status (for Trainer Dashboard) ──────────────────
-        public async Task<IEnumerable<PaymentDTO>> GetStudentPaymentStatusAsync(int trainerId, int? month, int? year)
+        public async Task<IEnumerable<PaymentDTO>> GetStudentPaymentStatusAsync(int trainerId, int? month, int? year, string? paymentStatus = null)
         {
-            var payments = await _repo.GetPTFeePaymentsForTrainerStudentsAsync(trainerId, month, year);
+            var payments = await _repo.GetPTFeePaymentsForTrainerStudentsAsync(trainerId, month, year, paymentStatus);
             return payments.Select(MapToDTO);
         }
 
@@ -163,6 +169,7 @@ namespace BLL.Services
         {
             Id = p.Id, MemberId = p.MemberId,
             MemberName = p.Member?.User != null ? $"{p.Member.User.FirstName} {p.Member.User.LastName}" : "",
+            GymId = p.Member?.GymId, MemberEmail = p.Member?.User?.Email,
             PackageName = p.PackageName, TotalAmount = p.TotalAmount, AmountPaid = p.AmountPaid,
             PaymentStatus = p.PaymentStatus, PaymentMethod = p.PaymentMethod,
             PaymentDate = p.PaymentDate, DueDate = p.DueDate, Notes = p.Notes, CreatedAt = p.CreatedAt

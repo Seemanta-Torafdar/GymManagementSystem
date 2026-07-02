@@ -66,11 +66,21 @@ else
         <div class="stat-label">Personal Trainer</div>
     </div>
     <div class="stat-card">
-        <div class="stat-card-icon @(Model.PaymentStatus == "Paid" ? "green" : "yellow")">
-            <i class="fas fa-@(Model.PaymentStatus == "Paid" ? "check-circle" : "clock")"></i>
+        @{
+            // Show PT fee status if trainer is assigned, otherwise show membership payment status
+            var displayStatus = Model.AssignedTrainerId.HasValue && Model.PersonalTrainingPaymentStatus != null
+                ? Model.PersonalTrainingPaymentStatus
+                : Model.PaymentStatus;
+            var displayLabel = Model.AssignedTrainerId.HasValue && Model.PersonalTrainingPaymentStatus != null
+                ? "PT Fee Status"
+                : "Payment Status";
+            var iconColor = displayStatus == "Paid" ? "green" : (displayStatus == "Partial Paid" ? "yellow" : "yellow");
+        }
+        <div class="stat-card-icon @iconColor">
+            <i class="fas fa-@(displayStatus == "Paid" ? "check-circle" : "clock")"></i>
         </div>
-        <div class="stat-value" style="font-size:1.1rem">@(Model.PaymentStatus ?? "—")</div>
-        <div class="stat-label">Payment Status</div>
+        <div class="stat-value" style="font-size:1.1rem">@(displayStatus ?? "—")</div>
+        <div class="stat-label">@displayLabel</div>
     </div>
 </div>
 

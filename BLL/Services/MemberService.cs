@@ -159,11 +159,11 @@ namespace BLL.Services
             var activePurchase = m.MembershipPurchases?.OrderByDescending(p => p.StartDate).FirstOrDefault(p => p.IsActive);
             var activeAssignment = m.TrainerAssignments?.FirstOrDefault(ta => ta.IsActive);
 
-            // Find the current month's PT fee payment (if any)
+            // Find the most recent PT fee payment (regardless of month — admin creates these manually)
             var currentMonthPTPayment = m.Payments?
-                .Where(p => p.PackageName != null && p.PackageName.StartsWith("PT Fee")
-                    && p.DueDate.Month == DateTime.Now.Month && p.DueDate.Year == DateTime.Now.Year)
-                .OrderByDescending(p => p.CreatedAt)
+                .Where(p => p.PackageName != null && p.PackageName.StartsWith("PT Fee"))
+                .OrderByDescending(p => p.DueDate)
+                .ThenByDescending(p => p.CreatedAt)
                 .FirstOrDefault();
 
             return new MemberDTO
@@ -185,6 +185,8 @@ namespace BLL.Services
                 ProfilePhoto = m.User?.ProfilePhoto,
                 JoinDate = m.JoinDate,
                 IsActive = m.User?.IsActive ?? false,
+                ActivePackageId = activePurchase?.PackageId,
+                ActiveShiftId = activePurchase?.ShiftId,
                 ActivePackageName = activePurchase?.Package?.Name,
                 MembershipStartDate = activePurchase?.StartDate,
                 MembershipEndDate = activePurchase?.EndDate,

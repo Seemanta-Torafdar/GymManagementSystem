@@ -11,19 +11,54 @@ namespace DAL.Repositories
         public PaymentRepo(GymDbContext context) { _context = context; }
 
         public async Task<IEnumerable<Payment>> GetAllAsync() =>
-            await _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).OrderByDescending(p => p.CreatedAt).ToListAsync();
+            await _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).Where(p => p.MembershipPurchaseId != null).OrderByDescending(p => p.CreatedAt).ToListAsync();
 
         public async Task<Payment?> GetByIdAsync(int id) =>
-            await _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).FirstOrDefaultAsync(p => p.Id == id);
+            await _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<IEnumerable<Payment>> GetByMemberIdAsync(int memberId) =>
             await _context.Payments.Where(p => p.MemberId == memberId).OrderByDescending(p => p.CreatedAt).ToListAsync();
 
-        public async Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null)
+        public async Task<IEnumerable<Payment>> GetFilteredAsync(string? search, int? month, int? year, DateTime? date = null, string? packageName = null, string? paymentStatus = null)
         {
-            var query = _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).AsQueryable();
+            var query = _context.Payments.Include(p => p.Member).ThenInclude(m => m.User).Where(p => p.MembershipPurchaseId != null).AsQueryable();
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Member.User.FirstName.Contains(search) || p.Member.User.LastName.Contains(search) || (p.Notes != null && p.Notes.Contains(search)));
+            {
+                var q = search.Trim().ToLower();
+                var parts = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                
+                if (parts.Length == 2)
+                {
+                    var p1 = parts[0];
+                    var p2 = parts[1];
+                    query = query.Where(p => 
+                        (p.Member.User.Email != null && p.Member.User.Email.ToLower() == q) || 
+                        (p.Member.GymId != null && p.Member.GymId.ToLower() == q) ||
+                        (p.Member.User.FirstName.ToLower().Contains(p1) && p.Member.User.LastName.ToLower().Contains(p2)) ||
+                        (p.Member.User.FirstName.ToLower().Contains(p2) && p.Member.User.LastName.ToLower().Contains(p1)) ||
+                        (p.Member.User.FirstName + " " + p.Member.User.LastName).ToLower().Contains(q) ||
+                        (p.Notes != null && p.Notes.ToLower().Contains(q)));
+                }
+                else
+                {
+                    query = query.Where(p => 
+                        p.Member.User.FirstName.ToLower().Contains(q) || 
+                        p.Member.User.LastName.ToLower().Contains(q) || 
+                        (p.Member.User.FirstName + " " + p.Member.User.LastName).ToLower().Contains(q) || 
+                        (p.Member.User.Email != null && p.Member.User.Email.ToLower() == q) || 
+                        (p.Member.GymId != null && p.Member.GymId.ToLower() == q) || 
+                        (p.Notes != null && p.Notes.ToLower().Contains(q)));
+                }
+            }
+            if (!string.IsNullOrEmpty(packageName))
+                query = query.Where(p => p.PackageName == packageName);
+            if (!string.IsNullOrEmpty(paymentStatus))
+            {
+                if (paymentStatus == "Paid")
+                    query = query.Where(p => p.PaymentStatus == "Paid");
+                else if (paymentStatus == "Unpaid")
+                    query = query.Where(p => p.PaymentStatus != "Paid");
+            }
             if (month.HasValue)
                 query = query.Where(p => p.PaymentDate.HasValue && p.PaymentDate.Value.Month == month);
             if (year.HasValue)
@@ -34,7 +69,28 @@ namespace DAL.Repositories
         }
 
         public async Task AddAsync(Payment payment) { await _context.Payments.AddAsync(payment); await _context.SaveChangesAsync(); }
-        public async Task UpdateAsync(Payment payment) { _context.Payments.Update(payment); await _context.SaveChangesAsync(); }
+        public async Task UpdateAsync(Payment payment) 
+        {
+            // Attach only the Payment entity and mark it as modified.
+            // Using _context.Payments.Update() with a tracked navigation (Member) causes
+            // EF to attempt to update related entities, leading to conflicts and stale data.
+            var entry = _context.Entry(payment);
+            if (entry.State == EntityState.Detached)
+                _context.Payments.Attach(payment);
+            entry.State = EntityState.Modified;
+            // Do not touch the Member navigation — only update the Payment scalar fields.
+            entry.Reference(p => p.Member).IsModified = false;
+
+            // Also sync the MembershipPurchase.PaymentStatus if linked
+            if (payment.MembershipPurchaseId.HasValue)
+            {
+                var purchase = await _context.MembershipPurchases.FindAsync(payment.MembershipPurchaseId.Value);
+                if (purchase != null)
+                    purchase.PaymentStatus = payment.PaymentStatus == "Paid" ? "Paid" : "Pending";
+            }
+            
+            await _context.SaveChangesAsync(); 
+        }
 
         public async Task<int> GetPendingCountAsync() =>
             await _context.Payments.CountAsync(p => p.PaymentStatus == "Unpaid" || p.PaymentStatus == "Partial Paid");
@@ -103,7 +159,7 @@ namespace DAL.Repositories
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
-        public async Task<IEnumerable<Payment>> GetPTFeePaymentsForTrainerStudentsAsync(int trainerId, int? month, int? year)
+        public async Task<IEnumerable<Payment>> GetPTFeePaymentsForTrainerStudentsAsync(int trainerId, int? month, int? year, string? paymentStatus = null)
         {
             // Get all active member IDs assigned to this trainer
             var memberIds = await _context.TrainerAssignments
@@ -119,6 +175,14 @@ namespace DAL.Repositories
                 query = query.Where(p => p.DueDate.Month == month.Value);
             if (year.HasValue)
                 query = query.Where(p => p.DueDate.Year == year.Value);
+                
+            if (!string.IsNullOrEmpty(paymentStatus))
+            {
+                if (paymentStatus == "Paid")
+                    query = query.Where(p => p.PaymentStatus == "Paid");
+                else if (paymentStatus == "Unpaid")
+                    query = query.Where(p => p.PaymentStatus != "Paid");
+            }
 
             return await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
         }

@@ -75,6 +75,36 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
     db.Database.Migrate();
+
+    // Fix missing payments for existing membership purchases
+    var purchasesWithoutPayments = db.MembershipPurchases
+        .Include(p => p.Package)
+        .Where(p => !db.Payments.Any(pay => pay.MembershipPurchaseId == p.Id))
+        .ToList();
+
+    if (purchasesWithoutPayments.Any())
+    {
+        foreach (var p in purchasesWithoutPayments)
+        {
+            if (p.Package != null)
+            {
+                var payment = new Payment
+                {
+                    MemberId = p.MemberId,
+                    MembershipPurchaseId = p.Id,
+                    PackageName = p.Package.Name,
+                    TotalAmount = p.Package.Price,
+                    AmountPaid = p.PaymentStatus == "Paid" ? p.Package.Price : 0,
+                    PaymentStatus = p.PaymentStatus ?? "Unpaid",
+                    DueDate = p.StartDate,
+                    PaymentDate = p.PaymentStatus == "Paid" ? p.StartDate : null,
+                    Notes = $"Membership Fee - {p.Package.Name}"
+                };
+                db.Payments.Add(payment);
+            }
+        }
+        db.SaveChanges();
+    }
 }
 
 app.MapControllerRoute(

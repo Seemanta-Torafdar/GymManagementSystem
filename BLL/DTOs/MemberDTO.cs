@@ -22,6 +22,8 @@ namespace BLL.DTOs
         public bool IsActive { get; set; }
 
         // Membership info
+        public int? ActivePackageId { get; set; }
+        public int? ActiveShiftId { get; set; }
         public string? ActivePackageName { get; set; }
         public DateTime? MembershipStartDate { get; set; }
         public DateTime? MembershipEndDate { get; set; }
@@ -78,5 +80,7 @@ namespace BLL.DTOs
         public string? EmergencyContact { get; set; }
         public string? EmergencyPhone { get; set; }
         public string? MedicalNotes { get; set; }
+        public int? PackageId { get; set; }
+        public int? ShiftId { get; set; }
     }
 }

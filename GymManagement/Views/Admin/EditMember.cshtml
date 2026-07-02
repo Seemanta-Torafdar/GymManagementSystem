@@ -58,6 +58,33 @@
             </div>
         </div>
 
+        <h3 class="form-section-title">Membership Details</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="PackageId" class="form-label">Active Gym Package</label>
+                <select asp-for="PackageId" class="form-control">
+                    <option value="">-- No Active Package --</option>
+                    @if(ViewBag.Packages != null){
+                        foreach (var p in ViewBag.Packages){
+                            <option value="@p.Id">@p.Name (৳@p.Price)</option>
+                        }
+                    }
+                </select>
+                <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px"><i class="fas fa-info-circle"></i> Changing this will start a new billing cycle today.</div>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShiftId" class="form-label">Shift</label>
+                <select asp-for="ShiftId" class="form-control">
+                    <option value="">-- None --</option>
+                    @if(ViewBag.Shifts != null){
+                        foreach (var s in ViewBag.Shifts){
+                            <option value="@s.Id">@s.ShiftName (@s.StartTime.ToString(@"hh\:mm") - @s.EndTime.ToString(@"hh\:mm"))</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
         <h3 class="form-section-title">Emergency & Medical</h3>
         <div class="form-grid">
             <div class="form-group">

@@ -3,9 +3,11 @@
     ViewData["Title"] = "Student Payments";
     Layout = "_TrainerLayout";
     var trainer = ViewBag.Trainer as BLL.DTOs.TrainerDTO;
-    var currentMonth = (int)ViewBag.Month;
-    var currentYear = (int)ViewBag.Year;
-    var monthName = new DateTime(currentYear, currentMonth, 1).ToString("MMMM yyyy");
+    int? currentMonth = ViewBag.Month as int?;
+    int currentYear = (int)ViewBag.Year;
+    string periodLabel = currentMonth.HasValue
+        ? new DateTime(currentYear, currentMonth.Value, 1).ToString("MMMM yyyy")
+        : $"All Months {currentYear}";
 }
 
 <div class="page-header">
@@ -55,9 +57,10 @@
 <!-- Payments Table -->
 <div class="table-card">
     <div class="table-card-header">
-        <span class="table-card-title"><i class="fas fa-calendar" style="color:var(--accent)"></i> @monthName</span>
+        <span class="table-card-title"><i class="fas fa-calendar" style="color:var(--accent)"></i> @periodLabel</span>
         <form method="get" style="display:flex;align-items:center;gap:10px">
             <select name="month" class="form-control" style="width:130px;padding:6px 10px;font-size:0.85rem">
+                <option value="" selected="@(!currentMonth.HasValue)">All Months</option>
                 @for (int m = 1; m <= 12; m++)
                 {
                     <option value="@m" selected="@(m == currentMonth)">@(new DateTime(2024, m, 1).ToString("MMMM"))</option>
@@ -115,7 +118,7 @@
                     <tr>
                         <td colspan="7" style="text-align:center;padding:50px;color:var(--text-muted)">
                             <i class="fas fa-receipt" style="font-size:2.5rem;display:block;margin-bottom:16px;opacity:0.25"></i>
-                            <div style="font-weight:700;margin-bottom:6px">No payment records for @monthName</div>
+                            <div style="font-weight:700;margin-bottom:6px">No payment records for @periodLabel</div>
                             <div style="font-size:0.85rem">PT fee payments from your students will appear here once the admin creates them.</div>
                         </td>
                     </tr>

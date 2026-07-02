@@ -1,138 +1,141 @@
-@model IEnumerable<BLL.DTOs.PersonalTrainingSessionDTO>
+@model IEnumerable<BLL.DTOs.PaymentDTO>
 @{
     ViewData["Title"] = "Personal Training";
     Layout = "_AdminLayout";
     var trainers = ViewBag.Trainers as IEnumerable<BLL.DTOs.TrainerDTO> ?? new List<BLL.DTOs.TrainerDTO>();
-    var members = ViewBag.Members as IEnumerable<BLL.DTOs.MemberDTO> ?? new List<BLL.DTOs.MemberDTO>();
-    decimal totalEarnings = Model.Sum(s => s.ChargePerSession);
-    decimal totalPaid = Model.Sum(s => s.AmountPaid);
-    decimal totalDue = Model.Sum(s => s.DueAmount);
+    var activeTrainerId = (int?)ViewBag.TrainerId;
+    var activeTrainer = trainers.FirstOrDefault(t => t.Id == activeTrainerId);
+    
+    decimal totalDue = Model.Sum(p => p.DueAmount);
+    decimal totalPaid = Model.Sum(p => p.AmountPaid);
+    
+    string currentStatus = ViewBag.PaymentStatus as string ?? "";
 }
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-dumbbell" style="color:var(--accent)"></i> Personal Training</h1>
-        <p>Manage 1-on-1 personal training sessions and payments.</p>
+        <h1><i class="fas fa-dumbbell" style="color:var(--accent)"></i> Personal Training Fees</h1>
+        <p>Manage monthly PT fees for students assigned to trainers</p>
     </div>
 </div>
 
 <div class="stats-grid" style="margin-bottom:20px">
-    <div class="stat-card"><div class="stat-card-icon green"><i class="fas fa-receipt"></i></div><div class="stat-value">@Model.Count()</div><div class="stat-label">Total Sessions</div></div>
-    <div class="stat-card"><div class="stat-card-icon blue"><i class="fas fa-money-bill"></i></div><div class="stat-value">৳@totalEarnings.ToString("N0")</div><div class="stat-label">Total Earnings</div></div>
-    <div class="stat-card"><div class="stat-card-icon green"><i class="fas fa-check"></i></div><div class="stat-value">৳@totalPaid.ToString("N0")</div><div class="stat-label">Total Paid</div></div>
-    <div class="stat-card"><div class="stat-card-icon red"><i class="fas fa-exclamation"></i></div><div class="stat-value">৳@totalDue.ToString("N0")</div><div class="stat-label">Total Due</div></div>
+    <div class="stat-card"><div class="stat-card-icon blue"><i class="fas fa-users"></i></div><div class="stat-value">@Model.Count()</div><div class="stat-label">Students / Fees</div></div>
+    <div class="stat-card"><div class="stat-card-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-value">৳@totalPaid.ToString("N0")</div><div class="stat-label">Collected</div></div>
+    <div class="stat-card"><div class="stat-card-icon red"><i class="fas fa-exclamation-circle"></i></div><div class="stat-value">৳@totalDue.ToString("N0")</div><div class="stat-label">Outstanding Due</div></div>
 </div>
 
-<div class="grid-2" style="grid-template-columns:300px 1fr;align-items:start">
-    <!-- Create Session -->
-    <div class="card">
-        <h3 class="form-section-title" style="margin-top:0"><i class="fas fa-plus"></i> Book Session</h3>
-        <form asp-action="CreatePTSession" method="post">
-            @Html.AntiForgeryToken()
-            <div class="form-group">
-                <label class="form-label">Trainer</label>
-                <select name="trainerId" id="trainerSelect" class="form-control" required>
-                    <option value="">-- Select Trainer --</option>
-                    @foreach (var t in trainers) { <option value="@t.Id">@t.FullName</option> }
-                </select>
+<div class="card" style="margin-bottom: 20px; padding: 15px 20px;">
+    <form method="get" action="/Admin/PersonalTraining" style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap">
+        <input type="hidden" name="paymentStatus" value="@currentStatus" />
+        <div style="flex-grow: 1; max-width: 400px;">
+            <label style="display:block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Select Trainer</label>
+            <select name="trainerId" class="form-control" onchange="this.form.submit()" style="font-size: 1.05rem; padding: 10px;">
+                @if(!trainers.Any()) {
+                    <option value="">No trainers available</option>
+                }
+                @foreach (var t in trainers) { 
+                    <option value="@t.Id" selected="@(activeTrainerId == t.Id ? "selected" : null)">@t.FullName (@t.Specialization)</option> 
+                }
+            </select>
+        </div>
+        
+        <div>
+            <label style="display:block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Month</label>
+            <select name="month" class="form-control" onchange="this.form.submit()" style="padding: 10px;">
+                <option value="">All Months</option>
+                @for (int m = 1; m <= 12; m++) {
+                    <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                }
+            </select>
+        </div>
+        
+        <div>
+            <label style="display:block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Year</label>
+            <input type="number" name="year" value="@ViewBag.Year" class="form-control" placeholder="Year" onchange="this.form.submit()" style="padding: 10px; width: 100px;" />
+        </div>
+        
+        @if(ViewBag.Month != null || ViewBag.Year != null){
+            <div>
+                <a href="/Admin/PersonalTraining?trainerId=@activeTrainerId" class="btn btn-secondary" style="padding: 10px 15px;">Clear Filters</a>
             </div>
-            <div class="form-group">
-                <label class="form-label">Member</label>
-                <select name="memberId" id="memberSelect" class="form-control" required>
-                    <option value="">-- Select Member --</option>
-                    @foreach (var m in members) { <option value="@m.Id" data-trainer-id="@m.AssignedTrainerId">@m.FullName</option> }
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Session Date</label>
-                <input type="date" name="sessionDate" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">Time Slot (e.g. 08:00-10:00)</label>
-                <input type="text" name="timeSlot" class="form-control" placeholder="08:00-10:00" required />
-            </div>
-            <div class="form-group">
-                <label class="form-label">Charge per Session (৳)</label>
-                <input type="number" name="charge" class="form-control" step="0.01" required placeholder="e.g. 1000" />
-            </div>
-            <button type="submit" class="btn-primary" style="width:100%;margin-top:8px"><i class="fas fa-plus"></i> Create Session</button>
-        </form>
+        }
+    </form>
+</div>
+
+@if(activeTrainerId > 0)
+{
+    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <a href="/Admin/PersonalTraining?trainerId=@activeTrainerId&month=@ViewBag.Month&year=@ViewBag.Year" class="btn @(string.IsNullOrEmpty(currentStatus) ? "btn-primary" : "btn-secondary")" style="padding: 10px 20px; font-weight: 600; border-radius: 8px;">All PT Fees</a>
+        <a href="/Admin/PersonalTraining?trainerId=@activeTrainerId&paymentStatus=Paid&month=@ViewBag.Month&year=@ViewBag.Year" class="btn @(currentStatus == "Paid" ? "btn-primary" : "btn-secondary")" style="padding: 10px 20px; font-weight: 600; border-radius: 8px;"><i class="fas fa-check-circle" style="color: @(currentStatus == "Paid" ? "#fff" : "var(--success)");"></i> Paid</a>
+        <a href="/Admin/PersonalTraining?trainerId=@activeTrainerId&paymentStatus=Unpaid&month=@ViewBag.Month&year=@ViewBag.Year" class="btn @(currentStatus == "Unpaid" ? "btn-primary" : "btn-secondary")" style="padding: 10px 20px; font-weight: 600; border-radius: 8px;"><i class="fas fa-exclamation-circle" style="color: @(currentStatus == "Unpaid" ? "#fff" : "var(--danger)");"></i> Unpaid</a>
     </div>
 
-    <!-- Sessions Table -->
-    <div class="card" style="padding:0">
-        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-            <h3 style="font-size:1.1rem;font-weight:700;margin:0">Sessions (@Model.Count())</h3>
-            <form method="get" action="/Admin/PersonalTraining" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <select name="trainerId" class="form-control" style="width:140px">
-                    <option value="">All Trainers</option>
-                    @foreach (var t in trainers) { <option value="@t.Id" selected="@(ViewBag.TrainerId == t.Id ? "selected" : null)">@t.FullName</option> }
-                </select>
-                <input type="date" name="date" value="@ViewBag.Date" class="form-control" style="width:130px" />
-                <select name="month" class="form-control" style="width:110px">
-                    <option value="">All Months</option>
-                    @for (int m = 1; m <= 12; m++) {
-                        <option value="@m" selected="@(ViewBag.Month == m ? "selected" : null)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
-                    }
-                </select>
-                <input type="number" name="year" value="@ViewBag.Year" placeholder="Year" class="form-control" style="width:75px" />
-                <select name="status" class="form-control" style="width:105px">
-                    <option value="">Status...</option>
-                    <option value="Paid" selected="@(ViewBag.Status == "Paid" ? "selected" : null)">Paid</option>
-                    <option value="Partial Paid" selected="@(ViewBag.Status == "Partial Paid" ? "selected" : null)">Partial</option>
-                    <option value="Unpaid" selected="@(ViewBag.Status == "Unpaid" ? "selected" : null)">Unpaid</option>
-                </select>
-                <select name="paymentMethod" class="form-control" style="width:125px">
-                    <option value="">Method...</option>
-                    <option value="Cash" selected="@(ViewBag.PaymentMethod == "Cash" ? "selected" : null)">Cash</option>
-                    <option value="Bank Transfer" selected="@(ViewBag.PaymentMethod == "Bank Transfer" ? "selected" : null)">Bank Transfer</option>
-                    <option value="bKash" selected="@(ViewBag.PaymentMethod == "bKash" ? "selected" : null)">bKash</option>
-                </select>
-                <button type="submit" class="btn-primary" style="padding:8px 12px"><i class="fas fa-filter"></i></button>
-                @if(ViewBag.TrainerId != null || ViewBag.Month != null || ViewBag.Year != null || ViewBag.Date != null || ViewBag.Status != null || ViewBag.PaymentMethod != null){
-                    <a asp-action="PersonalTraining" class="btn-secondary" style="padding:8px 12px">Clear</a>
-                }
-            </form>
+    <div class="table-card">
+        <div class="table-card-header">
+            <span class="table-card-title">Students for @(activeTrainer?.FullName)</span>
         </div>
-        <div style="padding:20px;overflow-x:auto">
+        <div style="overflow-x:auto">
             <table class="data-table">
                 <thead><tr>
-                    <th>Trainer</th><th>Member</th><th>Date</th><th>Slot</th>
-                    <th>Charge</th><th>Paid</th><th>Due</th><th>Status</th><th>Pay</th>
+                    <th>Student Name</th>
+                    <th>Package Details</th>
+                    <th>Amount & Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr></thead>
                 <tbody>
                     @if (!Model.Any()) {
-                        <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted)">No sessions found. Create one using the form.</td></tr>
+                        <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted)">No PT fees found for this trainer based on the current filters.</td></tr>
                     }
-                    @foreach (var s in Model)
+                    @foreach (var p in Model)
                     {
                         <tr>
-                            <td><strong>@s.TrainerName</strong></td>
-                            <td>@s.MemberName</td>
-                            <td>@s.SessionDate.ToString("MMM dd, yyyy")</td>
-                            <td><span class="badge badge-accent">@s.TimeSlot</span></td>
-                            <td>৳@s.ChargePerSession.ToString("N0")</td>
-                            <td style="color:#4ade80">৳@s.AmountPaid.ToString("N0")</td>
-                            <td style="color:var(--accent)">৳@s.DueAmount.ToString("N0")</td>
                             <td>
-                                @if (s.PaymentStatus == "Paid") { <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> }
-                                else if (s.PaymentStatus == "Partial Paid") { <span class="badge badge-warning"><i class="fas fa-adjust"></i> Partial</span> }
-                                else { <span class="badge badge-danger"><i class="fas fa-times"></i> Unpaid</span> }
+                                <strong>@p.MemberName</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+                                    @if(!string.IsNullOrEmpty(p.GymId)){ <div><i class="fas fa-id-badge"></i> @p.GymId</div> }
+                                    @if(!string.IsNullOrEmpty(p.MemberEmail)){ <div><i class="fas fa-envelope"></i> @p.MemberEmail</div> }
+                                </div>
                             </td>
                             <td>
-                                @if (s.PaymentStatus != "Paid")
+                                <div style="font-weight:600; color:var(--text-primary)">@(p.PackageName ?? "Personal Training Fee")</div>
+                                @if(!string.IsNullOrEmpty(p.Notes)) {
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">@p.Notes</div>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-weight:700;font-size:1.1rem;color:var(--accent)">৳@p.TotalAmount.ToString("N0")</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Due: @p.DueDate.ToString("MMM dd, yyyy")</div>
+                            </td>
+                            <td>
+                                @if (p.PaymentStatus == "Paid") { 
+                                    <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span> 
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">@p.PaymentDate?.ToString("MMM dd")</div>
+                                }
+                                else { 
+                                    <span class="badge badge-danger"><i class="fas fa-times"></i> Unpaid</span> 
+                                }
+                            </td>
+                            <td>
+                                @if (p.PaymentStatus != "Paid")
                                 {
-                                    <form asp-action="PayPTSession" method="post" style="display:flex;flex-direction:column;gap:4px;min-width:155px">
+                                    <form asp-action="MarkPTPaid" method="post" style="display:inline">
                                         @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@s.Id" />
-                                        <input type="number" name="amountPaid" class="form-control" style="padding:4px 8px;font-size:0.82rem" value="@s.DueAmount" step="0.01" required />
-                                        <select name="paymentMethod" class="form-control" style="padding:4px 8px;font-size:0.82rem">
-                                            <option>Cash</option><option>Bank Transfer</option><option>bKash</option>
-                                        </select>
-                                        <button type="submit" class="btn-sm btn-success"><i class="fas fa-check"></i> Pay</button>
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <input type="hidden" name="trainerId" value="@activeTrainerId" />
+                                        <button type="submit" class="btn-success btn-sm"><i class="fas fa-check"></i> Mark Paid</button>
                                     </form>
                                 }
-                                else { <span style="color:#4ade80"><i class="fas fa-check-circle"></i> Done</span> }
+                                else
+                                {
+                                    <form asp-action="MarkPTUnpaid" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <input type="hidden" name="trainerId" value="@activeTrainerId" />
+                                        <button type="submit" class="btn-outline-danger btn-sm" onclick="return confirm('Mark this PT fee as unpaid?');"><i class="fas fa-undo"></i> Mark Unpaid</button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
@@ -140,33 +143,12 @@
             </table>
         </div>
     </div>
-</div>
-
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var trainerSelect = document.getElementById("trainerSelect");
-            var memberSelect = document.getElementById("memberSelect");
-            if(trainerSelect && memberSelect) {
-                var allOptions = Array.from(memberSelect.options).slice(1); // Skip the placeholder
-                
-                trainerSelect.addEventListener("change", function() {
-                    var selectedTrainerId = this.value;
-                    
-                    // Reset member dropdown
-                    memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
-                    
-                    // Filter options
-                    allOptions.forEach(function(opt) {
-                        if (!selectedTrainerId || opt.getAttribute("data-trainer-id") === selectedTrainerId) {
-                            memberSelect.appendChild(opt.cloneNode(true));
-                        }
-                    });
-                });
-                
-                // Trigger once to setup initial state
-                trainerSelect.dispatchEvent(new Event("change"));
-            }
-        });
-    </script>
+}
+else
+{
+    <div class="card" style="padding: 40px; text-align: center;">
+        <i class="fas fa-dumbbell" style="font-size: 3rem; color: var(--border); margin-bottom: 20px;"></i>
+        <h2 style="color: var(--text-secondary);">No Trainers Found</h2>
+        <p>You need to create at least one trainer and assign them to a member.</p>
+    </div>
 }

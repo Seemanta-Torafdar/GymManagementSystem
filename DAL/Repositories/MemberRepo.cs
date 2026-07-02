@@ -43,12 +43,40 @@ namespace DAL.Repositories
             if (member != null) { _context.Members.Remove(member); await _context.SaveChangesAsync(); }
         }
         public async Task<int> GetTotalCountAsync() => await _context.Members.CountAsync();
-        public async Task<IEnumerable<Member>> SearchAsync(string query) =>
-            await _context.Members.Include(m => m.User)
+        public async Task<IEnumerable<Member>> SearchAsync(string query)
+        {
+            var q = query.Trim().ToLower();
+            var parts = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var dbQuery = _context.Members.Include(m => m.User)
                 .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Package)
                 .Include(m => m.MembershipPurchases).ThenInclude(mp => mp.Shift)
                 .Include(m => m.TrainerAssignments).ThenInclude(ta => ta.Trainer).ThenInclude(t => t.User)
-                .Where(m => m.User.FirstName.Contains(query) || m.User.LastName.Contains(query) || m.User.Email!.Contains(query) || m.Phone.Contains(query))
-                .ToListAsync();
+                .AsQueryable();
+
+            if (parts.Length == 2)
+            {
+                var p1 = parts[0];
+                var p2 = parts[1];
+                dbQuery = dbQuery.Where(m => 
+                    (m.User.Email != null && m.User.Email.ToLower() == q) || 
+                    (m.GymId != null && m.GymId.ToLower() == q) ||
+                    (m.Phone != null && m.Phone.Contains(q)) ||
+                    (m.User.FirstName.ToLower().Contains(p1) && m.User.LastName.ToLower().Contains(p2)) ||
+                    (m.User.FirstName.ToLower().Contains(p2) && m.User.LastName.ToLower().Contains(p1)) ||
+                    (m.User.FirstName + " " + m.User.LastName).ToLower().Contains(q)
+                );
+            }
+            else
+            {
+                dbQuery = dbQuery.Where(m => 
+                    m.User.FirstName.ToLower().Contains(q) || 
+                    m.User.LastName.ToLower().Contains(q) || 
+                    (m.User.FirstName + " " + m.User.LastName).ToLower().Contains(q) || 
+                    (m.User.Email != null && m.User.Email.ToLower() == q) || 
+                    (m.Phone != null && m.Phone.Contains(q)) || 
+                    (m.GymId != null && m.GymId.ToLower() == q));
+            }
+            return await dbQuery.ToListAsync();
+        }
     }
 }

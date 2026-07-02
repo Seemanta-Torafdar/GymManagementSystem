@@ -36,7 +36,27 @@ namespace DAL.Repositories
                 .Include(mp => mp.YogaSchedule).Include(mp => mp.CardioSchedule)
                 .OrderByDescending(mp => mp.StartDate)
                 .FirstOrDefaultAsync(mp => mp.MemberId == memberId && mp.IsActive);
-        public async Task AddPurchaseAsync(MembershipPurchase purchase) { await _context.MembershipPurchases.AddAsync(purchase); await _context.SaveChangesAsync(); }
+        public async Task AddPurchaseAsync(MembershipPurchase purchase) 
+        { 
+            await _context.MembershipPurchases.AddAsync(purchase); 
+            await _context.SaveChangesAsync(); 
+            var package = await _context.MembershipPackages.FindAsync(purchase.PackageId);
+            if(package != null) 
+            {
+                var payment = new Payment 
+                {
+                    MemberId = purchase.MemberId,
+                    MembershipPurchaseId = purchase.Id,
+                    PackageName = package.Name,
+                    TotalAmount = package.Price,
+                    DueDate = DateTime.Today,
+                    PaymentStatus = "Unpaid",
+                    Notes = $"Membership Fee - {package.Name}"
+                };
+                await _context.Payments.AddAsync(payment);
+                await _context.SaveChangesAsync();
+            }
+        }
         public async Task UpdatePurchaseAsync(MembershipPurchase purchase) { _context.MembershipPurchases.Update(purchase); await _context.SaveChangesAsync(); }
 
         // Shifts
