@@ -23,7 +23,10 @@
 }
 
 <div class="auth-page">
-    <div class="auth-bg"></div>
+    <div class="video-bg-container">
+        <video id="bg-video" autoplay loop muted playsinline></video>
+        <div class="video-overlay"></div>
+    </div>
     <div class="auth-card">
         <div class="auth-logo">
             <i class="fas fa-dumbbell brand-icon"></i>
@@ -158,14 +161,33 @@
 }
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 <script>
-function closeToast() {
-    const overlay = document.getElementById('successToast');
-    if (!overlay) return;
-    overlay.style.animation = 'fadeInOverlay 0.3s ease reverse';
-    setTimeout(() => overlay.style.display = 'none', 280);
-}
-// Auto-close after 6 seconds
-setTimeout(() => { if (document.getElementById('successToast')) closeToast(); }, 6000);
+    var video = document.getElementById('bg-video');
+    var videoSrc = 'https://stream.mux.com/01yW6GoUz01OTXk5w1Rt1MHkJWlCGIwj46SUONJZ4DJUE.m3u8';
+    
+    if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            video.play();
+        });
+    }
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+        video.addEventListener('loadedmetadata', function() {
+            video.play();
+        });
+    }
+
+    function closeToast() {
+        const overlay = document.getElementById('successToast');
+        if (!overlay) return;
+        overlay.style.animation = 'fadeInOverlay 0.3s ease reverse';
+        setTimeout(() => overlay.style.display = 'none', 280);
+    }
+    // Auto-close after 6 seconds
+    setTimeout(() => { if (document.getElementById('successToast')) closeToast(); }, 6000);
 </script>
 }

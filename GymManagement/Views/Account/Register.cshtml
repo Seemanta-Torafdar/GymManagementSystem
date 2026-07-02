@@ -8,7 +8,10 @@
     var cardios = ViewBag.CardioSchedules as IEnumerable<BLL.DTOs.CardioScheduleDTO> ?? Enumerable.Empty<BLL.DTOs.CardioScheduleDTO>();
 }
 <div class="auth-page" style="padding:100px 24px 40px">
-    <div class="auth-bg"></div>
+    <div class="video-bg-container">
+        <video id="bg-video" autoplay loop muted playsinline></video>
+        <div class="video-overlay"></div>
+    </div>
     <div class="auth-card wide">
         <div class="auth-logo">
             <i class="fas fa-dumbbell brand-icon"></i>
@@ -171,3 +174,26 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<script>
+    var video = document.getElementById('bg-video');
+    var videoSrc = 'https://stream.mux.com/01yW6GoUz01OTXk5w1Rt1MHkJWlCGIwj46SUONJZ4DJUE.m3u8';
+    
+    if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            video.play();
+        });
+    }
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+        video.addEventListener('loadedmetadata', function() {
+            video.play();
+        });
+    }
+</script>
+}
