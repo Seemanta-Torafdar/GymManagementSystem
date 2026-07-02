@@ -69,15 +69,15 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .main-nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 1000;
-    background: rgba(250, 248, 244, 0.75);
+    background: rgba(10, 10, 15, 0.75);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
-    border-bottom: 1px solid rgba(200,135,42,0.12);
+    border-bottom: 1px solid var(--border);
     transition: var(--transition);
 }
 .main-nav.scrolled {
-    background: rgba(250, 248, 244, 0.96);
-    box-shadow: 0 4px 24px rgba(100,70,30,0.10);
+    background: rgba(10, 10, 15, 0.96);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 .nav-container {
     max-width: 1280px;
@@ -591,10 +591,10 @@ section { position: relative; background: transparent; }
    FOOTER
    ============================================ */
 .site-footer {
-    background: rgba(242,237,230,0.97);
+    background: rgba(10, 10, 15, 0.75);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
-    border-top: 1px solid rgba(200,135,42,0.15);
+    border-top: 1px solid var(--border);
     padding: 64px 0 0;
 }
 .footer-content {
@@ -818,7 +818,7 @@ input[type="file"].form-control::-webkit-file-upload-button {
     .nav-links {
         display: none; flex-direction: column;
         position: absolute; top: 70px; left: 0; right: 0;
-        background: rgba(250,248,244,0.99);
+        background: rgba(10,10,15,0.99);
         border-bottom: 1px solid var(--border);
         padding: 16px 24px;
         gap: 4px;
