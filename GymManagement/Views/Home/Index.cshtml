@@ -54,18 +54,18 @@
             </div>
         </div>
         <div class="hero-visual">
-            <div class="hero-img-wrapper">
-                <i class="fas fa-dumbbell gym-icon-hero"></i>
+            <div class="hero-img-wrapper float-anim">
+                <i class="fas fa-dumbbell gym-icon-hero spin-slow"></i>
                 <img src="/images/gym-hero.jpg" alt="PowerFit Gym" />
             </div>
-            <div class="hero-floating-card card1">
+            <div class="hero-floating-card card1 float-anim-alt">
                 <div class="icon"><i class="fas fa-fire-flame-curved"></i></div>
                 <div class="info">
                     <strong>500+ kcal</strong>
                     <span>avg. burned/session</span>
                 </div>
             </div>
-            <div class="hero-floating-card card2">
+            <div class="hero-floating-card card2 float-anim">
                 <div class="icon"><i class="fas fa-trophy"></i></div>
                 <div class="info">
                     <strong>4.9 ★</strong>
@@ -127,7 +127,7 @@
             @foreach (var pkg in packages)
             {
                 bool isPopular = pkgIdx == 1;
-                <div class="package-card @(isPopular ? "popular" : "")">
+                <div class="package-card @(isPopular ? "popular pulse-glow" : "")">
                     @if (isPopular) { <span class="popular-badge">Most Popular</span> }
                     <div class="package-name">@pkg.Name</div>
                     <div class="package-duration"><i class="fas fa-calendar-days"></i> @pkg.DurationDays days</div>

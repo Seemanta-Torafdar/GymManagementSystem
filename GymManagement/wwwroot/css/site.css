@@ -856,3 +856,23 @@ input[type="file"].form-control::-webkit-file-upload-button {
 a:hover, button:hover {
     transform: scale(1.02);
 }
+
+/* Continuous Page Animations */
+@keyframes floatAnim {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+.float-anim { animation: floatAnim 5s ease-in-out infinite; }
+.float-anim-alt { animation: floatAnim 6s ease-in-out infinite reverse; }
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px var(--accent-soft); transform: scale(1); }
+    50% { box-shadow: 0 0 35px var(--accent-glow); transform: scale(1.02); }
+}
+.pulse-glow { animation: pulseGlow 3s infinite; }
+
+@keyframes spinSlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.spin-slow { animation: spinSlow 15s linear infinite; }
