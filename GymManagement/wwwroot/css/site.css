@@ -358,10 +358,9 @@ section { padding: 110px 0; }
    SECTION BACKGROUNDS — fully transparent, body color shows through
    ============================================ */
 section { position: relative; background: transparent; }
-/* Alternate sections with a very subtle tint for visual rhythm */
-#equipment  { background: rgba(200,135,42,0.04); }
 #about,
 #schedules,
+#equipment,
 #packages,
 #trainers,
 #contact    { background: transparent; }
