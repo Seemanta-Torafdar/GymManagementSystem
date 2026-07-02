@@ -58,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ---- Scroll Reveal ----
+    // Auto-apply reveal class to all major sections for a fully animated page
+    document.querySelectorAll('.hero-content, .hero-visual, .about-text-side, .about-visual, .about-feature, .section-title, .section-subtitle, .pkg-card, .trainer-card, .feature-card, .review-card, footer').forEach(el => {
+        el.classList.add('reveal');
+    });
+
     const reveals = document.querySelectorAll('.reveal');
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
