@@ -449,7 +449,7 @@ section { position: relative; background: transparent; }
 .trainer-card:hover { border-color: var(--border-accent); transform: translateY(-6px); box-shadow: 0 16px 48px rgba(100,70,30,0.14), 0 0 0 1px rgba(200,135,42,0.25); }
 .trainer-photo {
     height: 240px;
-    background: linear-gradient(135deg, var(--bg-secondary), #ede8df);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(28, 28, 36, 0.8));
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; position: relative;
 }
@@ -487,7 +487,7 @@ section { position: relative; background: transparent; }
 .equipment-card:hover { transform: translateY(-5px); border-color: var(--border-accent); box-shadow: var(--shadow-glow); }
 .equipment-img {
     height: 200px;
-    background: linear-gradient(135deg, var(--bg-secondary), #ede8df);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(28, 28, 36, 0.8));
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
 }
