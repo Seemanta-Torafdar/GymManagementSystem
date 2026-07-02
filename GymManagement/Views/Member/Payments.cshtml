@@ -42,8 +42,13 @@
     </form>
 </div>
 
+<div class="tabs-container" style="margin-bottom:20px; display:flex; gap:10px; border-bottom:2px solid var(--border-color); padding-bottom:10px;">
+    <button class="btn-primary" id="btn-gym-payments" onclick="showTab('gym')" style="border-radius:20px; padding:8px 20px;">Gym Payment</button>
+    <button class="btn-outline" id="btn-pt-payments" onclick="showTab('pt')" style="border-radius:20px; padding:8px 20px;">Personal Trainer Payment</button>
+</div>
+
 <!-- Gym Payments Section -->
-<div class="table-card" style="margin-bottom:30px">
+<div class="table-card" id="gym-payments-section" style="margin-bottom:30px; display:block;">
     <div class="table-card-header">
         <span class="table-card-title"><i class="fas fa-id-card"></i> Gym Membership Payments</span>
     </div>
@@ -86,7 +91,7 @@
 </div>
 
 <!-- PT Payments Section -->
-<div class="table-card">
+<div class="table-card" id="pt-payments-section" style="display:none;">
     <div class="table-card-header">
         <span class="table-card-title"><i class="fas fa-user-tie"></i> Personal Training Payments</span>
     </div>
@@ -127,3 +132,23 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function showTab(tabName) {
+            if (tabName === 'gym') {
+                document.getElementById('gym-payments-section').style.display = 'block';
+                document.getElementById('pt-payments-section').style.display = 'none';
+                
+                document.getElementById('btn-gym-payments').className = 'btn-primary';
+                document.getElementById('btn-pt-payments').className = 'btn-outline';
+            } else {
+                document.getElementById('gym-payments-section').style.display = 'none';
+                document.getElementById('pt-payments-section').style.display = 'block';
+                
+                document.getElementById('btn-gym-payments').className = 'btn-outline';
+                document.getElementById('btn-pt-payments').className = 'btn-primary';
+            }
+        }
+    </script>
+}
