@@ -359,9 +359,9 @@ section { padding: 110px 0; }
    ============================================ */
 section { position: relative; background: transparent; }
 /* Alternate sections with a very subtle tint for visual rhythm */
-#about,
 #schedules,
 #equipment  { background: rgba(200,135,42,0.04); }
+#about,
 #packages,
 #trainers,
 #contact    { background: transparent; }
