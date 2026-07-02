@@ -14,15 +14,16 @@ namespace GymManagement.Controllers
         private readonly INotificationService _notificationService;
         private readonly IAdminService _adminService;
         private readonly ITrainerService _trainerService;
+        private readonly IPaymentService _paymentService;
         private readonly UserManager<User> _userManager;
 
         public MemberController(IMemberService memberService, IMembershipService membershipService,
             INotificationService notificationService, IAdminService adminService,
-            ITrainerService trainerService, UserManager<User> userManager)
+            ITrainerService trainerService, IPaymentService paymentService, UserManager<User> userManager)
         {
             _memberService = memberService; _membershipService = membershipService;
             _notificationService = notificationService; _adminService = adminService;
-            _trainerService = trainerService; _userManager = userManager;
+            _trainerService = trainerService; _paymentService = paymentService; _userManager = userManager;
         }
 
         public async Task<IActionResult> Dashboard()
@@ -135,6 +136,32 @@ namespace GymManagement.Controllers
             }
 
             return View(member);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkNotificationRead(int id)
+        {
+            await _notificationService.MarkAsReadAsync(id);
+            return Ok();
+        }
+
+        public async Task<IActionResult> Payments(int? month, int? year)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+            var member = await _memberService.GetByUserIdAsync(user.Id);
+            if (member == null) return RedirectToAction("Login", "Account");
+
+            var payments = await _paymentService.GetByMemberIdAsync(member.Id);
+            
+            if (month.HasValue)
+                payments = payments.Where(p => p.DueDate.Month == month.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Month == month.Value));
+            if (year.HasValue)
+                payments = payments.Where(p => p.DueDate.Year == year.Value || (p.PaymentDate.HasValue && p.PaymentDate.Value.Year == year.Value));
+                
+            ViewBag.Month = month;
+            ViewBag.Year = year;
+            return View(payments);
         }
 
         public async Task<IActionResult> TrainerProfile(int id)
