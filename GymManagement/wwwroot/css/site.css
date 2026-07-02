@@ -44,7 +44,7 @@ body {
             rgba(5, 5, 10, 0.82) 50%,
             rgba(10, 10, 15, 0.88) 100%
         ),
-        url('/images/custom-bg.png') center center / cover fixed;
+        url('/images/custom-bg.jpg') center center / cover fixed;
     background-color: #0a0a0f;
     color: var(--text-primary);
     line-height: 1.6;
