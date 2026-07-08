@@ -14,7 +14,10 @@ builder.Services.AddControllersWithViews();
 
 // Database
 builder.Services.AddDbContext<GymDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions => 
+    {
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    }));
 
 // Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -64,7 +67,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Commented out to prevent the "Failed to determine the https port for redirect" warning
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
